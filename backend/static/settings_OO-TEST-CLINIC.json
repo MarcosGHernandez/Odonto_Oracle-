@@ -1,0 +1,10 @@
+{
+  "twilio_whatsapp_number": "whatsapp:+14155238886",
+  "twilio_sms_number": "+14155238886",
+  "nombre_clinica": "Clínica Dental Rostova",
+  "especialidad": "Odontopediatría y Estética",
+  "region_scraper": "MX",
+  "canal_notificacion": "whatsapp",
+  "clinica_id": "OO-TEST-CLINIC",
+  "nombre_doctor": "Dra. Elena Rostova"
+}

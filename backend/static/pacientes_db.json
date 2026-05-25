@@ -1,0 +1,604 @@
+[
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-CSLIM001",
+    "nombre": "Carlos Slim",
+    "telefono": "+529511234567",
+    "email": "carlos.slim@dominiomedico.com",
+    "fecha_nacimiento": "1940-01-28",
+    "historial_medico": "Paciente adulto mayor con excelente higiene general. Presenta antecedentes de implante dental en molar superior izquierdo. Requiere revision periodontica de rutina.",
+    "alergias": "Penicilina, AINEs",
+    "medicamentos_actuales": "Aspirina 100mg",
+    "enfermedades_cronicas": "Hipertension leve controlada",
+    "vitales": {
+      "presion_arterial": "120/80",
+      "frecuencia_cardiaca": "68",
+      "peso_kg": "82",
+      "estatura_cm": "178"
+    },
+    "documentos": [
+      {
+        "tipo": "receta",
+        "fecha": "2026-05-22 13:53:42",
+        "url": "http://localhost:8000/static/documents/receta_20260522_135342_f853fa.pdf",
+        "contenido": "Diagnóstico: Dolor agudo oclusal en molar 36 por caries profunda proximal.\nPrescripción: Amoxicilina 500mg (1 tableta cada 8 horas por 7 días) e Ibuprofeno 400mg (1 tableta cada 8 horas por 3 días para control del dolor e inflamación)."
+      }
+    ]
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-ARMANDO01",
+    "nombre": "Armando Ramos",
+    "telefono": "+529519876543",
+    "email": "armando.ramos@dentalmail.com",
+    "fecha_nacimiento": "1988-06-15",
+    "historial_medico": "Paciente con gingivitis leve en cuadrante inferior. Requiere profilaxis profunda, detartraje dental y resinas esteticas en premolares izquierdos.",
+    "alergias": "Ninguna declarada",
+    "medicamentos_actuales": "Ninguno",
+    "enfermedades_cronicas": "Ninguna",
+    "vitales": {
+      "presion_arterial": "118/75",
+      "frecuencia_cardiaca": "72",
+      "peso_kg": "75",
+      "estatura_cm": "172"
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-MARIA002",
+    "nombre": "Maria Lopez",
+    "telefono": "+529515551234",
+    "email": "maria.lopez@ejemplo.com",
+    "fecha_nacimiento": "1975-03-22",
+    "historial_medico": "Paciente con antecedentes de diabetes tipo 2. Presenta caries activa en segundo molar inferior derecho. Requiere endodoncia y posterior corona libre de metal.",
+    "alergias": "Latex, Sulfas",
+    "medicamentos_actuales": "Metformina 500mg, Glibenclamida 5mg",
+    "enfermedades_cronicas": "Diabetes Tipo 2",
+    "vitales": {
+      "presion_arterial": "130/85",
+      "frecuencia_cardiaca": "78",
+      "peso_kg": "68",
+      "estatura_cm": "160"
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-PEDRO003",
+    "nombre": "Pedro Garcia",
+    "telefono": "+529511112222",
+    "email": "pedro.garcia@outlook.com",
+    "fecha_nacimiento": "1995-11-10",
+    "historial_medico": "Deportista de alto rendimiento. Dentadura sana, requiere guarda oclusal para bruxismo nocturno moderado. Sin tratamientos invasivos pendientes.",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "Ninguno",
+    "enfermedades_cronicas": "Ninguna",
+    "vitales": {
+      "presion_arterial": "110/70",
+      "frecuencia_cardiaca": "58",
+      "peso_kg": "78",
+      "estatura_cm": "180"
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-a8920c18",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-921469d8",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-3f638313",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-0f4a7030",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-12345",
+    "nombre": "Carlos Garcia",
+    "telefono": "",
+    "email": "",
+    "documentos": [
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-20 18:05:44",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260520_180544_2c7be4.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 15:58:36",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_155836_4164f4.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 16:14:56",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_161456_0b43ca.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 17:14:24",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_171424_16936b.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 17:15:14",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_171513_287bc3.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 17:53:06",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_175306_646b90.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 17:55:11",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_175511_e5672d.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-05-21 17:56:53",
+        "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_175653_570397.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      }
+    ]
+  },
+  {
+    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
+    "paciente_id": "P-cd19f46c",
+    "nombre": "Karla Hernandez ",
+    "telefono": "951 112 1235",
+    "email": "",
+    "fecha_nacimiento": "2000-05-22",
+    "historial_medico": "",
+    "alergias": "",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {
+      "presion_arterial": "",
+      "frecuencia_cardiaca": "",
+      "peso_kg": "",
+      "estatura_cm": ""
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-0188c8bb",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-f8d0ab41",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-6a7bd6d4",
+    "nombre": "Paciente Legítimo",
+    "telefono": "+529510000001",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-b2da382b",
+    "nombre": "Test Injection",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "BYPASS-TENANT-001",
+    "paciente_id": "P-feb4fcd0",
+    "nombre": "Hacker Intento",
+    "telefono": "+10000000000",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-fbf0fd58",
+    "nombre": "Paciente Legítimo",
+    "telefono": "+529510000001",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-47685f26",
+    "nombre": "Test Injection",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "BYPASS-TENANT-001",
+    "paciente_id": "P-5a7945b8",
+    "nombre": "Hacker Intento",
+    "telefono": "+10000000000",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-998aec17",
+    "nombre": "Paciente Legítimo",
+    "telefono": "+529510000001",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-93a4b95d",
+    "nombre": "Test Injection",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "BYPASS-TENANT-001",
+    "paciente_id": "P-f96c1c98",
+    "nombre": "Hacker Intento",
+    "telefono": "+10000000000",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-d2acfaa7",
+    "nombre": "Paciente Legítimo",
+    "telefono": "+529510000001",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-b6daea4f",
+    "nombre": "Test Injection",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "BYPASS-TENANT-001",
+    "paciente_id": "P-f45c72a8",
+    "nombre": "Hacker Intento",
+    "telefono": "+10000000000",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-6f480f89",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-ffb4d5c1",
+    "nombre": "Paciente Legítimo",
+    "telefono": "+529510000001",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-a026135d",
+    "nombre": "Test Injection",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "BYPASS-TENANT-001",
+    "paciente_id": "P-24b27f21",
+    "nombre": "Hacker Intento",
+    "telefono": "+10000000000",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-7a89aa5c",
+    "nombre": "Steve Jobs",
+    "telefono": "+14085550199",
+    "email": "steve@apple.com",
+    "fecha_nacimiento": "1955-02-24",
+    "historial_medico": "Paciente requiere profilaxis dental de rutina. Excelente salud general.",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "Ninguno",
+    "enfermedades_cronicas": "Ninguna",
+    "vitales": {
+      "presion_arterial": "120/80",
+      "frecuencia_cardiaca": "70"
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-d98fd87c",
+    "nombre": "Steve Jobs",
+    "telefono": "+14085550199",
+    "email": "steve@apple.com",
+    "fecha_nacimiento": "1955-02-24",
+    "historial_medico": "Paciente requiere profilaxis dental de rutina. Excelente salud general.",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "Ninguno",
+    "enfermedades_cronicas": "Ninguna",
+    "vitales": {
+      "presion_arterial": "120/80",
+      "frecuencia_cardiaca": "70"
+    }
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-4371eae2",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-8dcc47d3",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-a9d2b533",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
+    "paciente_id": "P-e02c04e5",
+    "nombre": "Carlos Slim",
+    "telefono": "951 213 4512",
+    "email": "carlos@gmail.com",
+    "fecha_nacimiento": "1959-05-12",
+    "historial_medico": "",
+    "alergias": "",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {
+      "presion_arterial": "",
+      "frecuencia_cardiaca": "",
+      "peso_kg": "",
+      "estatura_cm": ""
+    },
+    "documentos": [
+      {
+        "tipo": "receta",
+        "fecha": "2026-05-23 22:07:10",
+        "url": "http://localhost:8000/static/documents/receta_20260523_220710_8fe979.pdf",
+        "contenido": "Diagnóstico: Dolor en molares. Tratamiento: Ibuprofeno 5mg, tomar una tableta cada 6 horas por 3 días. Médico responsable: DR Marco Hernández."
+      }
+    ]
+  },
+  {
+    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
+    "paciente_id": "P-ab3bb0dc",
+    "nombre": "Karla Hernández",
+    "telefono": "951 113 0366",
+    "email": "karlascr@gmail.com",
+    "fecha_nacimiento": "1997-03-11",
+    "historial_medico": "",
+    "alergias": "",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {
+      "presion_arterial": "",
+      "frecuencia_cardiaca": "",
+      "peso_kg": "",
+      "estatura_cm": ""
+    },
+    "documentos": [
+      {
+        "tipo": "receta",
+        "fecha": "2026-05-22 14:02:01",
+        "url": "http://localhost:8000/static/documents/receta_20260522_140201_a861ca.pdf",
+        "contenido": "Diagnóstico: Caries profunda en primer molar inferior izquierdo (diente 36).\nPrescripción: Ibuprofeno 400mg cada 8 horas por 3 días."
+      },
+      {
+        "tipo": "receta",
+        "fecha": "2026-05-23 21:15:27",
+        "url": "http://localhost:8000/static/documents/receta_20260523_211526_2a751f.pdf",
+        "contenido": "Diagnóstico: Dolor dental agudo.\nPrescripción: Paracetamol 5mg cada 4 horas para control del dolor.\nMédico Responsable: Doctor."
+      }
+    ]
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-04ccbedf",
+    "nombre": "Steve Jobs",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-TEST-CLINIC",
+    "paciente_id": "P-TEST001",
+    "nombre": "Sofía Loren",
+    "telefono": "+529519999999",
+    "email": "sofia.loren@gmail.com",
+    "fecha_nacimiento": "1934-09-20",
+    "historial_medico": "Paciente requiere limpieza dental profunda, detartraje y posterior resina estética oclusal en premolar superior izquierdo (diente 24). Presenta antecedentes de sensibilidad térmica leve.",
+    "alergias": "Aspirina, AINEs",
+    "medicamentos_actuales": "Ninguno",
+    "enfermedades_cronicas": "Ninguna",
+    "vitales": {
+      "presion_arterial": "115/75",
+      "frecuencia_cardiaca": "65",
+      "peso_kg": "62",
+      "estatura_cm": "165"
+    },
+    "documentos": []
+  }
+]

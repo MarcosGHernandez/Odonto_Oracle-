@@ -1,0 +1,122 @@
+version: '3.8'
+
+# ============================================================
+# Odonto-Oracle — Stack de Infraestructura Local / Staging
+# ============================================================
+# Servicios:
+#   1. elasticsearch  — Almacén vectorial de datos clínicos (RAG + Hybrid Search)
+#   2. elastic-mcp    — Servidor MCP de Elastic para Google Cloud Agent Builder
+#   3. api            — Backend FastAPI de Odonto-Oracle (espejo del Cloud Run)
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------------
+  # 1. Elasticsearch 8.13 — Motor de búsqueda y vector store
+  #    Límites de memoria ajustados para entorno local / hackathon:
+  #    512 MB heap → cabe en cualquier laptop de desarrollo
+  # ----------------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: odonto_elastic
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false          # Sin auth para dev local
+      - xpack.security.http.ssl.enabled=false
+      # Heap reducido a 512 MB para entorno local — no congela el host
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # Requiere que el kernel permita memory locking (ulimit -l unlimited)
+      - bootstrap.memory_lock=true
+      # Desactivar swap para evitar latencia impredecible
+      - "indices.memory.index_buffer_size=10%"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "0.0.0.0:9200:9200"
+      - "0.0.0.0:9300:9300"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - odonto_net
+    healthcheck:
+      # Verificar que el cluster responda antes de que dependan de él otros servicios
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health?timeout=5s | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 10s
+      timeout: 8s
+      retries: 8
+      start_period: 40s
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------
+  # 2. Elasticsearch MCP Server — Expone Elastic vía Model Context Protocol
+  #    Usado por Google Cloud Agent Builder para RAG sobre índices de pacientes
+  # ----------------------------------------------------------------
+  elastic-mcp:
+    image: docker.elastic.co/elasticsearch/mcp-server:latest
+    container_name: odonto_elastic_mcp
+    environment:
+      - ES_URL=http://elasticsearch:9200
+      - ES_API_KEY=
+      - MCP_PORT=8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - odonto_net
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------
+  # 3. API Backend — FastAPI (igual que Cloud Run pero local)
+  #    IMPORTANTE: Si Elastic no levanta, el backend opera con JSON
+  #    Fallback local — el sistema NUNCA se detiene por Elastic caído
+  # ----------------------------------------------------------------
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: odonto_api
+    environment:
+      # Conexión a Elasticsearch dentro de la red Docker (NO localhost)
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_API_KEY=
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM:-}
+      - PUBLIC_SERVER_URL=${PUBLIC_SERVER_URL:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      elasticsearch:
+        condition: service_started   # No bloquear si Elastic está lento — el backend tiene fallback
+    networks:
+      - odonto_net
+    volumes:
+      - ./backend/static:/app/static
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/ | grep -q 'ok'"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# ----------------------------------------------------------------
+# Volúmenes y Redes
+# ----------------------------------------------------------------
+volumes:
+  elastic_data:
+    driver: local
+
+networks:
+  odonto_net:
+    driver: bridge

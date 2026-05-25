@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+elasticsearch
+python-dotenv
+reportlab
+beautifulsoup4
+requests
+twilio
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+pytest
+pydantic

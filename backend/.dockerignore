@@ -1,0 +1,40 @@
+# Entornos virtuales de Python — nunca incluir en la imagen Docker
+venv/
+.venv/
+env/
+ENV/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Archivos de entorno (secrets se inyectan en Cloud Run como variables de entorno)
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Archivos generados localmente
+static/pdfs/
+openapi.json
+
+# Archivos de test
+test_suite.py
+
+# Editores y IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,43 @@
+# Dependencies
+frontend/node_modules/
+backend/venv/
+.venv/
+env/
+venv/
+ENV/
+
+# Next.js Build Output
+frontend/.next/
+frontend/out/
+
+# IDE and System Files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Python cache and distribution
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Static Generated PDFs (Prevent committing clinical documents)
+backend/static/documents/*.pdf
+backend/static/pdfs/*.pdf
+
+# Local logs
+*.log
+.gemini/
+.agents/

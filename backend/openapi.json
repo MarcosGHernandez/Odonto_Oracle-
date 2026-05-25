@@ -1,0 +1,728 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Odonto-Oracle Backend API",
+    "description": "Backend modular y altamente estructurado para el Agente Clínico y herramientas de soporte odontológico.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Verificar salud de la API",
+        "description": "Retorna el estado operativo de los servicios del backend de Odonto-Oracle.",
+        "operationId": "health_check",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webhook/paciente": {
+      "post": {
+        "summary": "Registrar o actualizar paciente",
+        "description": "Registra un nuevo paciente o actualiza su información clínica (antecedentes, alergias, vitales) en Elasticsearch y base local JSON. Este endpoint debe ser invocado por el agente en la nube o la interfaz de usuario cuando se requiera realizar el onboarding de un paciente o actualizar su ficha médica con nuevos signos vitales o antecedentes clínicos. Devuelve un JSON estructurado.",
+        "operationId": "registrar_paciente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PacientePayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pacientes/{clinica_id}": {
+      "get": {
+        "summary": "Listar todos los pacientes de la clínica",
+        "description": "Devuelve todos los pacientes registrados bajo un clinica_id específico. Requerido por la tabla del dashboard de React para carga inicial.",
+        "operationId": "listar_pacientes",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinica Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/search_patient": {
+      "post": {
+        "summary": "Buscar expediente de paciente",
+        "description": "Busca un paciente en el directorio de Elasticsearch de la clínica actual por su nombre o apellidos. Retorna sus datos personales, historial clínico, medicamentos, alergias y signos vitales. El agente LLM DEBE invocar esta herramienta obligatoriamente antes de generar una receta, plan de tratamiento o presupuesto para comprobar que el paciente existe y obtener sus datos correctos. No inventar nunca datos del paciente.",
+        "operationId": "buscar_paciente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPatientPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/schedule_appointment": {
+      "post": {
+        "summary": "Agendar cita o consulta dental",
+        "description": "Registra una nueva cita odontológica en Elasticsearch (índice consultas_produccion) y base de datos local JSON. Retorna confirmación del agendamiento. El agente LLM debe invocar este endpoint cuando el doctor indique explícitamente programar o agendar una cita para un paciente.",
+        "operationId": "agendar_cita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleAppointmentPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/search_paciente": {
+      "get": {
+        "summary": "Buscar expediente de paciente (GET legado)",
+        "description": "Endpoint GET heredado para buscar pacientes. Mantenido por compatibilidad.",
+        "operationId": "buscar_paciente_legacy",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinica Id"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Query"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/scraper": {
+      "post": {
+        "summary": "Escanear precios de mercado de materiales",
+        "description": "Realiza web scraping en tiempo real en depósitos dentales de la región especificada ('MX' o 'US') para buscar el precio comparativo de un insumo o material dental. Guarda el registro en el histórico y devuelve un JSON con productos, precios y enlaces. El agente LLM debe invocar este endpoint cuando el doctor solicite cotizar o buscar precios de un material dental.",
+        "operationId": "buscar_precios_material",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScraperPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/pdf_generator": {
+      "post": {
+        "summary": "Generar documento clínico en PDF",
+        "description": "Genera un archivo PDF físico elegante y profesional (receta médica, presupuesto dental formal o plan de tratamiento) con los datos del paciente e información detallada. Guarda el archivo en un directorio estático público y devuelve su URL de descarga. El agente LLM debe llamar a esta herramienta una vez haya recopilado la información del paciente y los precios para consolidar el archivo y presentárselo al doctor.",
+        "operationId": "generar_documento_clinico",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PDFPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/notifier": {
+      "post": {
+        "summary": "Enviar notificación al paciente",
+        "description": "Envía una notificación o mensaje en tiempo real a un paciente (simulado o real con Twilio) mediante WhatsApp o SMS. El agente LLM debe usar esta herramienta cuando el doctor solicite expresamente enviar una alerta, un presupuesto o una receta directo al celular del paciente.",
+        "operationId": "enviar_notificacion_paciente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifierPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "NotifierPayload": {
+        "properties": {
+          "paciente_id": {
+            "type": "string",
+            "title": "Paciente Id",
+            "description": "Número de teléfono móvil o identificador de destino del paciente (ej. '+529511234567')."
+          },
+          "mensaje_texto": {
+            "type": "string",
+            "title": "Mensaje Texto",
+            "description": "Texto redactado en lenguaje natural que se enviará al celular del paciente."
+          },
+          "canal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canal",
+            "description": "Canal de comunicación a utilizar para la entrega: 'whatsapp' (predeterminado) o 'sms'.",
+            "default": "whatsapp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "paciente_id",
+          "mensaje_texto"
+        ],
+        "title": "NotifierPayload"
+      },
+      "PDFPayload": {
+        "properties": {
+          "tipo_documento": {
+            "type": "string",
+            "title": "Tipo Documento",
+            "description": "Tipo de documento clínico o administrativo a generar: 'receta', 'presupuesto' o 'tratamiento'."
+          },
+          "datos_paciente": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datos Paciente",
+            "description": "Diccionario completo con los datos del paciente (nombre, paciente_id, alergias) recuperados previamente mediante buscar_paciente."
+          },
+          "contenido_medico": {
+            "type": "string",
+            "title": "Contenido Medico",
+            "description": "Contenido detallado del documento: medicamentos recetados, diagnóstico, partidas de cotización o plan de tratamiento detallado."
+          },
+          "idioma": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idioma",
+            "description": "Idioma en el que se estructurará el archivo PDF generado: 'es' para español o 'en' para inglés.",
+            "default": "es"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo_documento",
+          "contenido_medico"
+        ],
+        "title": "PDFPayload"
+      },
+      "PacientePayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica (tenant) para garantizar el aislamiento Multi-Tenant de los datos."
+          },
+          "paciente_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paciente Id",
+            "description": "Identificador clínico único del paciente. Dejar en nulo si es un nuevo registro; se autogenerará."
+          },
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "description": "Nombre completo del paciente (Nombres y Apellidos) para propósitos de registro y búsqueda."
+          },
+          "telefono": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono",
+            "description": "Número de teléfono móvil del paciente con código de país (ej. '+529511234567') para notificaciones."
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email",
+            "description": "Correo electrónico de contacto para envío de presupuestos u hojas de tratamiento."
+          },
+          "fecha_nacimiento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Nacimiento",
+            "description": "Fecha de nacimiento del paciente en formato estándar ISO YYYY-MM-DD."
+          },
+          "historial_medico": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Historial Medico",
+            "description": "Antecedentes médicos relevantes, patologías previas o historial clínico de importancia.",
+            "default": ""
+          },
+          "alergias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alergias",
+            "description": "Alergias médicas declaradas (ej. Penicilina, Látex, Anestésicos) críticas para la seguridad del paciente.",
+            "default": ""
+          },
+          "medicamentos_actuales": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Medicamentos Actuales",
+            "description": "Medicamentos o fármacos que el paciente consume actualmente de forma regular.",
+            "default": ""
+          },
+          "enfermedades_cronicas": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enfermedades Cronicas",
+            "description": "Enfermedades crónicas declaradas por el paciente (ej. Diabetes, Hipertensión).",
+            "default": ""
+          },
+          "vitales": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vitales",
+            "description": "Valores de signos vitales (presión arterial, frecuencia cardiaca, oxigenación, temperatura, peso, etc.)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "clinica_id",
+          "nombre"
+        ],
+        "title": "PacientePayload"
+      },
+      "ScheduleAppointmentPayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica.",
+            "default": "OO-CLINIC-001"
+          },
+          "paciente_id": {
+            "type": "string",
+            "title": "Paciente Id",
+            "description": "ID clínico del paciente (ej. 'P-CSLIM001' o 'P-ARMANDO01')."
+          },
+          "fecha_consulta": {
+            "type": "string",
+            "title": "Fecha Consulta",
+            "description": "Fecha y hora de la cita programada en formato ISO YYYY-MM-DD o YYYY-MM-DD HH:MM."
+          },
+          "diagnostico": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostico",
+            "description": "Motivo de la cita o diagnóstico preliminar (ej. 'Profilaxis y limpieza general').",
+            "default": ""
+          },
+          "tratamiento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tratamiento",
+            "description": "Tratamiento odontológico agendado o planeado para la cita.",
+            "default": ""
+          },
+          "notas_adicionales": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notas Adicionales",
+            "description": "Notas clínicas o administrativas adicionales para la cita.",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "paciente_id",
+          "fecha_consulta"
+        ],
+        "title": "ScheduleAppointmentPayload"
+      },
+      "ScraperPayload": {
+        "properties": {
+          "material_dental": {
+            "type": "string",
+            "title": "Material Dental",
+            "description": "Nombre específico del material dental, insumo o equipo a cotizar (ej. 'Resina Z350 de 3M')."
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region",
+            "description": "Región geográfica para realizar la cotización de precios: 'MX' para depósitos de México o 'US' para Estados Unidos.",
+            "default": "MX"
+          }
+        },
+        "type": "object",
+        "required": [
+          "material_dental"
+        ],
+        "title": "ScraperPayload"
+      },
+      "SearchPatientPayload": {
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "title": "Nombre",
+            "description": "Nombre o apellido (completo o parcial) del paciente a buscar en los registros clínicos."
+          },
+          "clinica_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinica Id",
+            "description": "Identificador de la clínica del tenant activo para aislar la búsqueda de datos.",
+            "default": "OO-CLINIC-001"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "title": "SearchPatientPayload"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
