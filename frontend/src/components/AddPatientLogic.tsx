@@ -56,7 +56,8 @@ export function useAddPatient() {
     setState({ loading: true, success: false, error: null });
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? '/api/proxy';
+      const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      const backendUrl = isLocal ? (process.env.NEXT_PUBLIC_BACKEND_URL ?? '/api/proxy') : '/api/proxy';
 
       const response = await fetch(`${backendUrl}/webhook/paciente`, {
         method: 'POST',
