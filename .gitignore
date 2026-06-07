@@ -48,4 +48,6 @@ backend/static/pdfs/*.pdf
 .env.local
 backend/.env
 frontend/.env.local
+prod.env
+*.env
 
