@@ -20,8 +20,9 @@ from reportlab.graphics.shapes import Drawing, Line
 # Cargar variables de entorno
 load_dotenv()
 
-# Directorio donde se almacenan los PDFs (Ruta Absoluta de Windows Estricta)
-_PDF_DIR = os.path.abspath(os.path.normpath(r"C:\Users\Predator Pro\OneDrive\Documents\Proyectos\Marcos_proyects\Hackaton odonto\backend\static\documents"))
+# Directorio donde se almacenan los PDFs
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_PDF_DIR = os.path.abspath(os.path.join(_BASE_DIR, "static", "documents"))
 
 # URL base del servidor — ajustable via variable de entorno
 _SERVER_URL = os.getenv("PUBLIC_SERVER_URL", "http://localhost:8080")
