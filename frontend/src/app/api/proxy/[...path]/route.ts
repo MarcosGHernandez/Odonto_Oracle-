@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_TARGET = process.env.BACKEND_URL && !process.env.BACKEND_URL.startsWith('/') 
-  ? process.env.BACKEND_URL 
-  : 'http://127.0.0.1:8080';
+const getBackendUrl = () => {
+  const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  return url && !url.startsWith('/') ? url : 'http://127.0.0.1:8080';
+};
+const BACKEND_TARGET = getBackendUrl();
 
 export async function GET(
   req: NextRequest,

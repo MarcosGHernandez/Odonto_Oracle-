@@ -193,7 +193,7 @@ export default function Home() {
       </main>
 
       <footer className="max-w-7xl mx-auto px-6 py-12 border-t border-slate-100 dark:border-zinc-900 flex justify-between items-center text-[9px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-[0.4em]">
-        <div>© 2024 Odonto-Oracle / Secure Environment</div>
+        <div>© 2026 Odonto-Oracle / Developed by Marcos Hernández / Secure Environment</div>
         <div className="flex gap-12">
           <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">{labels.compliance}</a>
           <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">{labels.logs}</a>
