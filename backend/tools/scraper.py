@@ -134,40 +134,44 @@ def dental_market_scraper(material_dental: str, region: str) -> str:
         if random.random() < 0.1:
             raise requests.exceptions.ConnectionError("Simulated network drop")
 
+        import urllib.parse
+        import base64
+        query_encoded = urllib.parse.quote_plus(material_dental)
+        query_b64 = base64.b64encode(material_dental.encode("utf-8")).decode("utf-8")
+        # Strip padding as required by tiendaddvc
+        query_b64 = query_b64.rstrip("=")
         resultados = []
 
         if region == "MX":
-            proveedor = "Depósito Dental Mexicano"
             moneda    = "MXN"
             resultados = [
                 {
                     "Producto":  f"{material_dental} — Marca 3M (Premium)",
                     "Precio":    f"${random.randint(500, 1500)} {moneda}",
-                    "Proveedor": proveedor,
-                    "URL":       f"https://dentalmx.com/search?q={material_dental.replace(' ', '+')}",
+                    "Proveedor": "Depósito Dental Villa de Cortés",
+                    "URL":       f"https://tiendaddvc.mx/search.html?query={query_b64}",
                 },
                 {
                     "Producto":  f"{material_dental} — Marca Económica",
                     "Precio":    f"${random.randint(200, 600)} {moneda}",
-                    "Proveedor": proveedor,
-                    "URL":       f"https://dentalmx.com/search?q={material_dental.replace(' ', '+')}",
+                    "Proveedor": "Depósito Dental Molar",
+                    "URL":       f"https://ddmolar.com/search?q={query_encoded}",
                 },
             ]
         else:  # US
-            proveedor = "US Dental Supply"
             moneda    = "USD"
             resultados = [
                 {
                     "Producto":  f"{material_dental.title()} — Premium Brand",
                     "Precio":    f"${random.randint(30, 100)} {moneda}",
-                    "Proveedor": proveedor,
-                    "URL":       f"https://usdentalsupply.com/search?q={material_dental.replace(' ', '+')}",
+                    "Proveedor": "Net32 Dental Market",
+                    "URL":       f"https://www.net32.com/search?q={query_encoded}",
                 },
                 {
                     "Producto":  f"{material_dental.title()} — Generic",
                     "Precio":    f"${random.randint(10, 40)} {moneda}",
-                    "Proveedor": proveedor,
-                    "URL":       f"https://usdentalsupply.com/search?q={material_dental.replace(' ', '+')}",
+                    "Proveedor": "Dental City",
+                    "URL":       f"https://www.dentalcity.com/search?q={query_encoded}",
                 },
             ]
 

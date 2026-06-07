@@ -85,29 +85,54 @@ const navLinks = [
   { href: '/dashboard/ajustes', key: 'settings', icon: icons.settings, accent: 'text-slate-900 dark:text-white', bg: 'bg-slate-100 dark:bg-zinc-800' },
 ];
 
-function Sidebar({ collapsed, setCollapsed }: { collapsed: boolean; setCollapsed: (v: boolean) => void }) {
+function Sidebar({ 
+  collapsed, 
+  setCollapsed, 
+  onLinkClick 
+}: { 
+  collapsed: boolean; 
+  setCollapsed: (v: boolean) => void; 
+  onLinkClick?: () => void;
+}) {
   const pathname = usePathname();
   const { lang } = useDashboard();
   const labels = t[lang];
 
   return (
     <aside className={`relative flex flex-col h-full transition-all duration-300 ease-in-out ${collapsed ? 'w-[68px]' : 'w-60'} bg-white dark:bg-black border-r border-slate-200 dark:border-zinc-800`}>
-      <div className="flex items-center gap-3 px-4 h-20 border-b border-slate-200 dark:border-zinc-800">
-        <div className="w-10 h-10 border-2 border-slate-900 dark:border-white flex items-center justify-center">
-          {icons.cross}
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <p className="text-sm font-black uppercase tracking-tighter">Odonto-Oracle</p>
-            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">{labels.portal}</p>
+      <div className="flex items-center justify-between px-4 h-20 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 border-2 border-slate-900 dark:border-white flex items-center justify-center">
+            {icons.cross}
           </div>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <p className="text-sm font-black uppercase tracking-tighter">Odonto-Oracle</p>
+              <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">{labels.portal}</p>
+            </div>
+          )}
+        </div>
+        {onLinkClick && (
+          <button 
+            onClick={onLinkClick} 
+            className="lg:hidden p-2 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all text-slate-800 dark:text-white"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         )}
       </div>
       <nav className="flex-1 px-3 py-6 space-y-2">
         {navLinks.map(link => {
           const isActive = pathname === link.href;
           return (
-            <Link key={link.key} href={link.href} className={`flex items-center gap-3 px-4 py-3 border transition-all ${isActive ? `${link.bg} border-slate-900 dark:border-white font-black` : 'border-transparent text-slate-500 dark:text-zinc-400 hover:border-slate-200 dark:hover:border-zinc-800 hover:text-slate-900 dark:hover:text-white'}`}>
+            <Link 
+              key={link.key} 
+              href={link.href} 
+              onClick={onLinkClick}
+              className={`flex items-center gap-3 px-4 py-3 border transition-all ${isActive ? `${link.bg} border-slate-900 dark:border-white font-black` : 'border-transparent text-slate-500 dark:text-zinc-400 hover:border-slate-200 dark:hover:border-zinc-800 hover:text-slate-900 dark:hover:text-white'}`}
+            >
               <span className={isActive ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-zinc-500'}>{link.icon}</span>
               {!collapsed && <span className="text-xs uppercase tracking-widest">{labels[link.key as keyof typeof labels]}</span>}
             </Link>
@@ -158,6 +183,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <DashboardProvider>
       <div className="w-full h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-white transition-colors duration-500 overflow-hidden">
+        
+        {/* Mobile Sidebar overlay/drawer */}
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Drawer Container */}
+            <div className="relative flex flex-col w-64 max-w-xs bg-white dark:bg-black border-r border-slate-200 dark:border-zinc-800 shadow-2xl animate-in slide-in-from-left duration-300">
+              <Sidebar collapsed={false} setCollapsed={() => {}} onLinkClick={() => setMobileOpen(false)} />
+            </div>
+          </div>
+        )}
+
         <div className="relative z-10 flex flex-1 overflow-hidden h-full">
           <div className="hidden lg:flex flex-col h-full">
             <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />

@@ -37,14 +37,14 @@ def get_elastic_client() -> Elasticsearch:
         _client = Elasticsearch(
             hosts=[elastic_url],
             api_key=api_key,
-            timeout=2,        # 2s hard limit — throw immediately if Elastic is down
-            max_retries=0     # No reintentos — falla rápido, fallback a JSON local
+            request_timeout=2,  # 2s hard limit — throw immediately if Elastic is down
+            max_retries=0       # No reintentos — falla rápido, fallback a JSON local
         )
     else:
         _client = Elasticsearch(
             hosts=[elastic_url],
-            timeout=2,        # 2s hard limit — throw immediately if Elastic is down
-            max_retries=0     # No reintentos — falla rápido, fallback a JSON local
+            request_timeout=2,  # 2s hard limit — throw immediately if Elastic is down
+            max_retries=0       # No reintentos — falla rápido, fallback a JSON local
         )
 
     # Chequeo proactivo de conexión en la primera inicialización

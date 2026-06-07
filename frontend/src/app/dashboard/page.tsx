@@ -5,7 +5,7 @@ import { useDashboard } from './context';
 import ChatInterface from '@/components/ChatInterface';
 import { useAuth } from '@clerk/nextjs';
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = '/api/proxy';
 
 const t = {
   es: {
@@ -118,6 +118,10 @@ export default function DashboardPage() {
 
   const { orgId, userId } = useAuth();
   const clinicaId = orgId || userId || 'OO-CLINIC-001';
+
+  const friendlyClinicaId = clinicaId === 'OO-CLINIC-001'
+    ? clinicaId
+    : `${clinicaId.startsWith('org_') ? 'OO-ORG-' : 'OO-CLINIC-'}${clinicaId.replace('user_', '').replace('org_', '').substring(0, 6).toUpperCase()}`;
 
   const [metricas, setMetricas] = useState({
     pacientes_atendidos: 0,
@@ -268,7 +272,7 @@ export default function DashboardPage() {
         <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 self-start sm:self-auto">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[9px] font-mono font-black tracking-widest text-slate-500 dark:text-zinc-400 uppercase">
-            {labels.clinicId}: {clinicaId}
+            {labels.clinicId}: {friendlyClinicaId}
           </span>
         </div>
       </div>

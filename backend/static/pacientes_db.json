@@ -20,7 +20,7 @@
       {
         "tipo": "receta",
         "fecha": "2026-05-22 13:53:42",
-        "url": "http://localhost:8000/static/documents/receta_20260522_135342_f853fa.pdf",
+        "url": "http://localhost:8080/static/documents/receta_20260522_135342_f853fa.pdf",
         "contenido": "Diagnóstico: Dolor agudo oclusal en molar 36 por caries profunda proximal.\nPrescripción: Amoxicilina 500mg (1 tableta cada 8 horas por 7 días) e Ibuprofeno 400mg (1 tableta cada 8 horas por 3 días para control del dolor e inflamación)."
       }
     ]
@@ -185,26 +185,20 @@
         "fecha": "2026-05-21 17:56:53",
         "url": "http://127.0.0.1:8000/static/pdfs/presupuesto_20260521_175653_570397.pdf",
         "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-06-05 20:01:34",
+        "url": "http://localhost:8080/static/documents/presupuesto_20260605_200134_7d0165.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
+      },
+      {
+        "tipo": "presupuesto",
+        "fecha": "2026-06-05 21:04:59",
+        "url": "http://localhost:8080/static/documents/presupuesto_20260605_210458_1c8f51.pdf",
+        "contenido": "1. Resina de fotocurado Z350 - $850.00 MXN\n2. Limpieza ultrasónica - $450.00 MXN\nTotal: $1,300.00 MXN"
       }
     ]
-  },
-  {
-    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
-    "paciente_id": "P-cd19f46c",
-    "nombre": "Karla Hernandez ",
-    "telefono": "951 112 1235",
-    "email": "",
-    "fecha_nacimiento": "2000-05-22",
-    "historial_medico": "",
-    "alergias": "",
-    "medicamentos_actuales": "",
-    "enfermedades_cronicas": "",
-    "vitales": {
-      "presion_arterial": "",
-      "frecuencia_cardiaca": "",
-      "peso_kg": "",
-      "estatura_cm": ""
-    }
   },
   {
     "clinica_id": "OO-CLINIC-001",
@@ -534,6 +528,12 @@
         "fecha": "2026-05-23 22:07:10",
         "url": "http://localhost:8000/static/documents/receta_20260523_220710_8fe979.pdf",
         "contenido": "Diagnóstico: Dolor en molares. Tratamiento: Ibuprofeno 5mg, tomar una tableta cada 6 horas por 3 días. Médico responsable: DR Marco Hernández."
+      },
+      {
+        "tipo": "receta",
+        "fecha": "2026-05-27 04:22:18",
+        "url": "/static/documents/receta_20260527_042217_090573.pdf",
+        "contenido": "Diagnóstico: Muelas del juicio, requiere extracción. Medicamento: Paracetamol 5mg, tomar una tableta cada 6 horas. Médico responsable: DR Simi."
       }
     ]
   },
@@ -541,7 +541,7 @@
     "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
     "paciente_id": "P-ab3bb0dc",
     "nombre": "Karla Hernández",
-    "telefono": "951 113 0366",
+    "telefono": "951 182 1234",
     "email": "karlascr@gmail.com",
     "fecha_nacimiento": "1997-03-11",
     "historial_medico": "",
@@ -600,5 +600,135 @@
       "estatura_cm": "165"
     },
     "documentos": []
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-7bdbd9ce",
+    "nombre": "Steve Jobs d9070f",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-eca16540",
+    "nombre": "Paciente Legítimo 67c39f",
+    "telefono": "+529510c00637",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-a9104e0c",
+    "nombre": "Test Injection 1a873c",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-fc1ca7c2",
+    "nombre": "Steve Jobs b38bb5",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-193b13a9",
+    "nombre": "Steve Jobs 5231d0",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-6c0fcb9c",
+    "nombre": "Steve Jobs fb90a6",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-a9571bf3",
+    "nombre": "Steve Jobs f0dfd8",
+    "telefono": "+140855582ed",
+    "email": "steve_f0dfd8@apple.com",
+    "fecha_nacimiento": "1955-02-24",
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-29713723",
+    "nombre": "Steve Jobs bac295",
+    "telefono": "+1408555c8c4",
+    "email": "steve_bac295@apple.com",
+    "fecha_nacimiento": "1955-02-24",
+    "historial_medico": "",
+    "alergias": "Nueces, Polvo",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-098f603c",
+    "nombre": "Paciente Legítimo b05f19",
+    "telefono": "+52951015e80e",
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "",
+    "alergias": "Ninguna",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
+  },
+  {
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-724e1bdb",
+    "nombre": "Test Injection bb502d",
+    "telefono": null,
+    "email": null,
+    "fecha_nacimiento": null,
+    "historial_medico": "{\"clinica_id\": \"EVIL-CORP-999\", \"admin\": true}",
+    "alergias": "None",
+    "medicamentos_actuales": "",
+    "enfermedades_cronicas": "",
+    "vitales": {}
   }
 ]

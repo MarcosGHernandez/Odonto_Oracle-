@@ -73,7 +73,7 @@ def buscar_paciente(nombre: str, clinica_id: str = "clinica_default") -> dict | 
                 "size": 5,
             }
 
-            response = es.search(index=PACIENTES_INDEX, body=query)
+            response = es.search(index=PACIENTES_INDEX, body=query, search_type="dfs_query_then_fetch")
             hits = response["hits"]["hits"]
 
             if hits:

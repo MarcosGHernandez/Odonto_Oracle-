@@ -10,7 +10,9 @@ const tool = (options: any) => options;
 // Permite respuestas en streaming de hasta 30 segundos
 export const maxDuration = 30;
 
-const BACKEND = 'http://127.0.0.1:8000';
+const BACKEND = process.env.BACKEND_URL && !process.env.BACKEND_URL.startsWith('/') 
+  ? process.env.BACKEND_URL 
+  : 'http://127.0.0.1:8080';
 
 // ---------------------------------------------------------------------------
 // safeStreamFallback — Garantiza que el chat NUNCA muestre burbuja vacía.
@@ -166,7 +168,7 @@ Reglas de Encadenamiento y Lógica de Negocio:
 6. ANTES de generar recetas o presupuestos para un paciente, DEBES buscarlo en la base de datos usando 'buscar_paciente' para validar que existe y obtener sus datos reales (ID clínico, teléfono, alergias). NUNCA inventes datos de un paciente.
 7. Si te piden cotizar un material dental, usa 'buscar_precio_material' especificando el material y la región (MX o US).
 8. Una vez tengas los datos del paciente y la cotización del material, procede a crear el presupuesto PDF formal usando 'generar_documento_clinico'.
-9. Si el doctor lo solicitó, envía de inmediato el presupuesto generado o una notificación al paciente usando 'enviar_notificacion_whatsapp' con su ID clínico.
+9. Si el doctor lo solicitó, envía de inmediato el presupuesto generado o una notificación al paciente usando 'enviar_notificacion_whatsapp' (para WhatsApp) o 'enviar_notificacion_email' (para Correo Electrónico) con su ID clínico o email de destino. Si se envía por correo simulado, DEBES presentar obligatoriamente en tu respuesta final el enlace Markdown [Ver Correo Enviado](URL_DE_SIMULACION) para que el doctor visualice la previsualización del correo.
 
 Reglas Críticas de Comportamiento:
 10. Responde siempre en el idioma en que te pregunten (Español o English). Sé conciso, preciso, profesional y clínico. PROHIBICIÓN ABSOLUTA DE EMOJIS: No utilices ningún emoji en tus respuestas.
@@ -177,13 +179,13 @@ Reglas Críticas de Comportamiento:
 15. PRESENTACIÓN DE DOCUMENTOS: Cuando la herramienta generar_documento_clinico devuelva una URL de descarga, DEBES presentar el enlace real de descarga al doctor de forma obligatoria y clara utilizando el formato Markdown: [Descargar Documento](URL_REAL). Por ejemplo: "He generado la receta. Puede descargarla aquí: [Descargar Receta](http://localhost:8000/static/documents/receta_20260522.pdf)". Sin este link real de descarga, el paciente no podrá ver el documento.
 16. INTERACCIÓN FORMAL Y VALIDACIÓN ESTRICTA: Cuando te soliciten registrar un nuevo paciente ('registrar_paciente') o editar uno existente ('editar_paciente'), DEBES adoptar un tono altamente profesional y formal, y VALIDAR interactivamente los datos médicos con el doctor antes de guardarlos. Si el doctor no proporciona datos críticos como alergias, enfermedades crónicas, fecha de nacimiento o medicamentos, pregúntale explícitamente para asegurar un expediente clínico completo y de calidad para el paciente. No registres pacientes con información incompleta a menos que el doctor insista explícitamente.
 17. PLANIFICACIÓN DE CITAS: Al agendar una cita ('agendar_cita'), DEBES primero invocar 'consultar_agenda' para verificar los horarios ocupados y confirmar la disponibilidad en tiempo real, así como usar 'buscar_paciente' para asegurarse de que el paciente existe y obtener su ID clínico correcto. Valida de forma clara y formal la fecha y la hora (en formato YYYY-MM-DD o YYYY-MM-DD HH:MM), el motivo o diagnóstico preliminar y el tratamiento planeado. Confirma los detalles con el doctor de manera profesional antes de completar el agendamiento.
-18. ESTADÍSTICAS Y MÉTRICAS DE LA CLÍNICA: Cuando te pregunten cuántos pacientes hay en la clínica, qué volumen de recetas se ha emitido, cuántos presupuestos se han generado, o cuáles son las alertas clínicas activas, DEBES obligatoriamente invocar la herramienta 'obtener_metricas_clinica' para obtener datos exactos y reales del sistema. Luego, redacta una respuesta clara, profesional, clínica y estructurada en prosa formal, sin emojis ni formatos crudos de JSON.
+18. ESTADÍSTICAS Y MÉTRICAS DE LA CLÍNICA: DOSIFICACIÓN Y CONTROL. Cuando te pregunten cuántos pacientes hay en la clínica, qué volumen de recetas se ha emitido, cuántos presupuestos se han generado, o cuáles son las alertas clínicas activas, DEBES obligatoriamente invocar la herramienta 'obtener_metricas_clinica' para obtener datos exactos y reales del sistema. Luego, redacta una respuesta clara, profesional, clínica y estructurada en prosa formal, sin emojis ni formatos crudos de JSON.
 19. ANÁLISIS DE EXPEDIENTES GENERAL: Si te piden un listado general de pacientes o revisar cuántos expedientes existen, puedes usar 'listar_pacientes' para obtener una vista completa de los registros y presentarla formalmente en prosa o en una tabla limpia de Markdown.
 20. ENLACES Y COTIZACIONES: Si la herramienta retorna una lista de proveedores, debes presentarla en una tabla Markdown dentro de la respuesta. Esto es obligatorio para visualizar los datos. No omitas la tabla. Por ejemplo:
 | Producto | Precio | Proveedor | Enlace |
 |---|---|---|---|
 | Resina Z350 3M | $750 MXN | Depósito Dental Mexicano | [Ver Producto](https://dentalmx.com/search?q=Resina+Z350) |
-21. CONFIRMACION OBLIGATORIA POST-HERRAMIENTA — REGLA CRITICA DE FLUJO: Cada vez que completes con exito o con error el uso de una herramienta de accion (agendar_cita, generar_documento_clinico, registrar_paciente, editar_paciente, enviar_notificacion_whatsapp, buscar_precio_material), DEBES generar OBLIGATORIAMENTE una respuesta descriptiva en prosa para el doctor INMEDIATAMENTE DESPUES. Nunca dejes la burbuja del chat vacia o en silencio tras una herramienta. Si tuvo exito: narra clinicamente lo que se completo. Si hubo error: explica que fallo y sugiere como resolverlo.
+21. CONFIRMACION OBLIGATORIA POST-HERRAMIENTA — REGLA CRITICA DE FLUJO: Cada vez que completes con exito o con error el uso de una herramienta de accion (agendar_cita, generar_documento_clinico, registrar_paciente, editar_paciente, enviar_notificacion_whatsapp, enviar_notificacion_email, buscar_precio_material), DEBES generar OBLIGATORIAMENTE una respuesta descriptiva en prosa para el doctor INMEDIATAMENTE DESPUES. Nunca dejes la burbuja del chat vacia o en silencio tras una herramienta. Si tuvo exito: narra clinicamente lo que se completo e incluye los enlaces de previsualizacion si aplica. Si hubo error: explica que fallo y sugiere como resolverlo.
 22. CONCIENCIA DE CITAS Y PACIENTES: Al inicio de esta sesion tienes acceso al CONTEXTO CLINICO EN TIEMPO REAL que se muestra mas abajo. Este directorio y agenda fueron cargados automaticamente. Usalo para responder preguntas directas sin necesidad de invocar herramientas. Si necesitas datos frescos o confirmar disponibilidad antes de agendar, invoca 'consultar_agenda' o 'buscar_paciente' de inmediato.
 
 ${clinicContext}`;
@@ -648,6 +650,53 @@ export async function POST(req: Request) {
                 status: 'error',
                 message: err.message,
                 agent_instruction: `CONFIRMACION OBLIGATORIA: El canal de notificacion no respondio (${err.message}). Informa al doctor con educacion clinica que el mensaje no pudo entregarse y recomiendele contactar al paciente directamente.`,
+              };
+            }
+          },
+        }),
+
+        // ---------------------------------------------------------------
+        // Tool 4b: Envío de notificaciones por Correo Electrónico (Email)
+        // ---------------------------------------------------------------
+        enviar_notificacion_email: tool({
+          description: 'Envía una notificación oficial en formato HTML premium al paciente por Correo Electrónico (Email).',
+          parameters: zodSchema(z.object({
+            paciente_id: z.string().describe('ID clínico del paciente destinatario o dirección de correo electrónico.'),
+            mensaje_texto: z.string().describe('Texto clínico o administrativo del correo a enviar al paciente.'),
+          })),
+          inputSchema: zodSchema(z.object({
+            paciente_id: z.string().describe('ID clínico del paciente destinatario o dirección de correo electrónico.'),
+            mensaje_texto: z.string().describe('Texto clínico o administrativo del correo a enviar al paciente.'),
+          })),
+          execute: async ({ paciente_id, mensaje_texto }: { paciente_id: string; mensaje_texto: string }) => {
+            try {
+              const res = await fetchWithTimeout(`${BACKEND}/tools/notifier`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paciente_id, mensaje_texto, canal: 'email', clinica_id: clinicaId }),
+                timeout: 8000,
+              });
+              if (!res.ok) {
+                return {
+                  status: 'error',
+                  message: `HTTP ${res.status}`,
+                  agent_instruction: `CONFIRMACION OBLIGATORIA: El envio de correo al paciente ${paciente_id} fallo con error HTTP ${res.status}. Informa al doctor profesionalmente que el correo no pudo entregarse y sugierele verificar los datos del paciente.`,
+                };
+              }
+              const data = await res.json();
+              const validated = validateToolResponse(data, 'enviar_notificacion_email');
+              if (validated.status === 'error') {
+                return validated;
+              }
+              return {
+                ...validated,
+                agent_instruction: `CONFIRMACION OBLIGATORIA: El correo al paciente ${paciente_id} fue procesado exitosamente. DEBES presentar obligatoriamente en tu respuesta final el enlace Markdown para que el doctor visualice la previsualización del correo, y resumir el contenido del mensaje enviado de forma profesional sin emojis.`,
+              };
+            } catch (err: any) {
+              return {
+                status: 'error',
+                message: err.message,
+                agent_instruction: `CONFIRMACION OBLIGATORIA: El canal de notificacion por correo no respondio (${err.message}). Informa al doctor profesionalmente que el mensaje no pudo entregarse.`,
               };
             }
           },

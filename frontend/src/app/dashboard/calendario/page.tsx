@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useDashboard } from '../context';
 import { useAuth } from '@clerk/nextjs';
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = '/api/proxy';
 
 const t = {
   es: {
@@ -22,7 +22,7 @@ const t = {
     patient: 'PACIENTE',
     time: 'HORA',
     diagnostic: 'DIAGNÓSTICO',
-    treatment: 'TRATAMIENTO',
+        treatment: 'TRATAMIENTO',
     notes: 'NOTAS ADICIONALES',
     patientId: 'ID PACIENTE',
     closeDetail: 'CERRAR',
@@ -31,7 +31,15 @@ const t = {
     months: [
       'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
       'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
-    ]
+    ],
+    status: 'ESTADO',
+    completed: 'COMPLETADA',
+    pending: 'PENDIENTE',
+    markCompleted: 'COMPLETAR CITA',
+    historyTitle: 'HISTORIAL DE CITAS COMPLETADAS',
+    noHistory: 'Sin citas completadas en el historial.',
+    completeModalTitle: 'REGISTRAR Y COMPLETAR CONSULTA',
+    saveComplete: 'REGISTRAR CONSULTA'
   },
   en: {
     title: 'APPOINTMENTS AGENDA',
@@ -57,7 +65,15 @@ const t = {
     months: [
       'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
       'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
-    ]
+    ],
+    status: 'STATUS',
+    completed: 'COMPLETED',
+    pending: 'PENDING',
+    markCompleted: 'COMPLETE APPOINTMENT',
+    historyTitle: 'COMPLETED APPOINTMENTS HISTORY',
+    noHistory: 'No completed appointments in history.',
+    completeModalTitle: 'RECORD & COMPLETE CONSULTATION',
+    saveComplete: 'RECORD CONSULTATION'
   }
 };
 
@@ -70,6 +86,8 @@ interface Cita {
   diagnostico?: string;
   tratamiento?: string;
   notas_adicionales?: string;
+  estado?: string;
+  fecha_completada?: string;
 }
 
 export default function CalendarioPage() {
@@ -110,6 +128,65 @@ export default function CalendarioPage() {
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Estados y Handlers para Cierre/Completado de consulta
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completeDiagnostico, setCompleteDiagnostico] = useState('');
+  const [completeTratamiento, setCompleteTratamiento] = useState('');
+  const [completeNotas, setCompleteNotas] = useState('');
+
+  const handleCompleteClick = () => {
+    if (!activeAppointment) return;
+    setCompleteDiagnostico(activeAppointment.diagnostico || '');
+    setCompleteTratamiento(activeAppointment.tratamiento || '');
+    setCompleteNotas(activeAppointment.notas_adicionales || '');
+    setCompleteModalOpen(true);
+  };
+
+  const handleCompleteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAppointment) return;
+    setSubmitting(true);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/tools/complete_appointment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clinica_id: clinicaId,
+          appointment_id: activeAppointment._id,
+          diagnostico: completeDiagnostico,
+          tratamiento: completeTratamiento,
+          notas_adicionales: completeNotas
+        })
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        setToastMessage(lang === 'es' ? '¡CONSULTA COMPLETADA Y REGISTRADA!' : 'CONSULTATION COMPLETED & RECORDED!');
+        
+        // Actualizar activeAppointment en caliente
+        setActiveAppointment({
+          ...activeAppointment,
+          estado: 'completada',
+          diagnostico: completeDiagnostico,
+          tratamiento: completeTratamiento,
+          notas_adicionales: completeNotas
+        });
+
+        setCompleteModalOpen(false);
+        setRefreshTrigger(prev => prev + 1);
+      } else {
+        alert(data.message || (lang === 'es' ? 'Error al completar cita.' : 'Failed to complete appointment.'));
+      }
+    } catch (err: any) {
+      alert(`${lang === 'es' ? 'Error al conectar con backend' : 'Backend connection error'}: ${err.message}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const [patients, setPatients] = useState<any[]>([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
@@ -630,8 +707,14 @@ export default function CalendarioPage() {
                             setSelectedDate(cell.date);
                             setActiveAppointment(app);
                           }}
-                          className="bg-slate-100 hover:bg-slate-900 hover:text-white dark:bg-zinc-900 dark:hover:bg-white dark:hover:text-black border border-slate-200 dark:border-zinc-800 text-[8px] px-1 py-0.5 font-bold uppercase tracking-wider truncate text-slate-800 dark:text-zinc-300 rounded-none max-w-full cursor-pointer transition-all"
-                          title={`${getAppointmentTimeString(app.fecha_consulta)} - ${app.nombre_paciente}`}
+                          className={`hover:text-white dark:hover:text-black border text-[8px] px-1 py-0.5 font-bold uppercase tracking-wider truncate rounded-none max-w-full cursor-pointer transition-all ${
+                            app.estado === 'completada'
+                              ? 'bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-900/60 opacity-50 line-through text-slate-400 dark:text-zinc-600'
+                              : 'bg-slate-100 hover:bg-slate-900 dark:bg-zinc-900 dark:hover:bg-white border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300'
+                          }`}
+                          title={`${getAppointmentTimeString(app.fecha_consulta)} - ${app.nombre_paciente} ${
+                            app.estado === 'completada' ? (lang === 'es' ? '(COMPLETADA)' : '(COMPLETED)') : ''
+                          }`}
                         >
                           <span className="font-mono text-slate-400 dark:text-zinc-600 mr-1">
                             {getAppointmentTimeString(app.fecha_consulta)}
@@ -703,14 +786,18 @@ export default function CalendarioPage() {
                             setSelectedDate(cell.date);
                             setActiveAppointment(app);
                           }}
-                          className="bg-slate-100 hover:bg-slate-900 hover:text-white dark:bg-zinc-900 dark:hover:bg-white dark:hover:text-black border border-slate-200 dark:border-zinc-800 text-[8px] p-2 font-bold uppercase tracking-wider rounded-none transition-all flex flex-col gap-1 text-slate-800 dark:text-zinc-300"
+                          className={`border text-[8px] p-2 font-bold uppercase tracking-wider rounded-none transition-all flex flex-col gap-1 ${
+                            app.estado === 'completada'
+                              ? 'bg-slate-50/60 dark:bg-zinc-950/40 border-slate-200 dark:border-zinc-900/40 opacity-50 text-slate-400 dark:text-zinc-600 line-through'
+                              : 'bg-slate-100 hover:bg-slate-900 hover:text-white dark:bg-zinc-900 dark:hover:bg-white dark:hover:text-black border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300'
+                          }`}
                         >
                           <span className="font-mono text-[8px] font-black border-b border-slate-200 dark:border-zinc-800 pb-0.5 mb-0.5">
-                            {getAppointmentTimeString(app.fecha_consulta)}
+                            {getAppointmentTimeString(app.fecha_consulta)} {app.estado === 'completada' && '[OK]'}
                           </span>
                           <span className="truncate">{app.nombre_paciente}</span>
                           <span className="text-[7px] text-slate-400 dark:text-zinc-500 font-normal truncate">
-                            {app.diagnostico || 'Consulta general'}
+                            {app.estado === 'completada' ? (lang === 'es' ? 'COMPLETADA' : 'COMPLETED') : (app.diagnostico || 'Consulta general')}
                           </span>
                         </div>
                       ))}
@@ -813,6 +900,17 @@ export default function CalendarioPage() {
                     </span>
                   </div>
 
+                  <div>
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">{labels.status}</label>
+                    <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 border block mt-1 w-fit ${
+                      activeAppointment.estado === 'completada'
+                        ? 'border-emerald-600 bg-emerald-50/10 text-emerald-600 dark:text-emerald-500'
+                        : 'border-amber-600 bg-amber-50/10 text-amber-600 dark:text-amber-500'
+                    }`}>
+                      {activeAppointment.estado === 'completada' ? labels.completed : labels.pending}
+                    </span>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">{labels.time}</label>
@@ -849,6 +947,16 @@ export default function CalendarioPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Botón Completar Consulta */}
+                {activeAppointment.estado !== 'completada' && (
+                  <button
+                    onClick={handleCompleteClick}
+                    className="w-full py-2 border-2 border-emerald-600 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-widest transition-all mb-2"
+                  >
+                    {labels.markCompleted}
+                  </button>
+                )}
 
                 {/* Botones de Acción CRUD */}
                 <div className="flex gap-2 pt-2">
@@ -1045,6 +1153,181 @@ export default function CalendarioPage() {
                   {submitting 
                     ? (lang === 'es' ? 'GUARDANDO...' : 'SAVING...') 
                     : (lang === 'es' ? 'GUARDAR CITA' : 'BOOK APPOINTMENT')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Historial de Citas Completadas */}
+      <div className="border-2 border-slate-900 dark:border-zinc-800 bg-white dark:bg-black p-6 space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-200 dark:border-zinc-900 pb-3">
+          <div>
+            <h2 className="text-sm font-black tracking-widest text-slate-900 dark:text-white uppercase">{labels.historyTitle}</h2>
+            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 tracking-[0.2em] uppercase">
+              {lang === 'es' ? 'REGISTRO CRONOLÓGICO DE CONSULTAS CONCLUIDAS' : 'CHRONOLOGICAL LOG OF COMPLETED SESSIONS'}
+            </p>
+          </div>
+          <span className="text-[10px] font-mono font-black px-2 py-0.5 border border-slate-900 dark:border-zinc-700 bg-slate-900 dark:bg-zinc-800 text-white">
+            {appointments.filter(app => app.estado === 'completada').length}
+          </span>
+        </div>
+
+        {appointments.filter(app => app.estado === 'completada').length === 0 ? (
+          <p className="text-[10px] text-slate-450 dark:text-zinc-550 text-center py-6 border border-dashed border-slate-200 dark:border-zinc-800">
+            {labels.noHistory}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-[300px] pr-1">
+            {appointments
+              .filter(app => app.estado === 'completada')
+              .sort((a, b) => new Date(b.fecha_consulta).getTime() - new Date(a.fecha_consulta).getTime())
+              .map(app => (
+                <div 
+                  key={app._id}
+                  className="border border-slate-200 dark:border-zinc-800 p-4 space-y-3 bg-slate-50/50 dark:bg-zinc-950/20 hover:border-slate-950 dark:hover:border-white transition-all flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white truncate max-w-[70%]">
+                        {app.nombre_paciente}
+                      </span>
+                      <span className="text-[8px] font-mono text-slate-400 bg-slate-100 dark:bg-zinc-900 px-1 py-0.5 border border-slate-200 dark:border-zinc-800/80">
+                        {getAppointmentDateString(app.fecha_consulta)}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">{labels.diagnostic}</span>
+                      <span className="text-[9px] text-slate-800 dark:text-zinc-300 block line-clamp-2 uppercase">
+                        {app.diagnostico || '—'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest block">{labels.treatment}</span>
+                      <span className="text-[9px] text-slate-800 dark:text-zinc-300 block line-clamp-2 uppercase">
+                        {app.tratamiento || '—'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const [y, m, d] = getAppointmentDateString(app.fecha_consulta).split('-').map(Number);
+                      const appDate = new Date(y, m - 1, d);
+                      setSelectedDate(appDate);
+                      setActiveAppointment(app);
+                      
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="w-full mt-2 py-1.5 border border-slate-900 dark:border-zinc-700 hover:bg-slate-950 hover:text-white dark:hover:bg-white dark:hover:text-black text-[8px] font-black uppercase tracking-widest transition-all"
+                  >
+                    {lang === 'es' ? 'VER EN DETALLE' : 'VIEW DETAILS'}
+                  </button>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Modal de Cierre y Registro de Consulta */}
+      {completeModalOpen && activeAppointment && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-950 border-2 border-slate-950 dark:border-white max-w-md w-full p-6 space-y-6 animate-in fade-in zoom-in-95 duration-150 shadow-2xl">
+            <div className="border-b border-slate-200 dark:border-zinc-900 pb-3 flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-black tracking-tighter text-slate-955 dark:text-white uppercase">
+                  {labels.completeModalTitle}
+                </h3>
+                <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 tracking-[0.2em] uppercase">
+                  {lang === 'es' ? 'REGISTRO CLÍNICO FINAL DE CONSULTA' : 'FINAL CONSULTATION REPORT'}
+                </p>
+              </div>
+              <button 
+                onClick={() => setCompleteModalOpen(false)}
+                className="text-slate-450 hover:text-slate-950 dark:hover:text-white font-mono text-sm font-black p-1"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleCompleteSubmit} className="space-y-4">
+              {/* Información del Paciente (Solo Lectura) */}
+              <div className="p-3 bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 space-y-1">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">
+                  {lang === 'es' ? 'PACIENTE A REGISTRAR' : 'PATIENT TO RECORD'}
+                </span>
+                <span className="text-[11px] font-black uppercase text-slate-900 dark:text-white block">
+                  {activeAppointment.nombre_paciente}
+                </span>
+                <span className="text-[9px] font-mono text-slate-500 block">
+                  {activeAppointment.paciente_id} | {activeAppointment.fecha_consulta}
+                </span>
+              </div>
+
+              {/* Diagnóstico Final */}
+              <div className="space-y-1">
+                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">
+                  {lang === 'es' ? 'DIAGNÓSTICO CLÍNICO FINAL' : 'FINAL CLINICAL DIAGNOSIS'}
+                </label>
+                <textarea
+                  value={completeDiagnostico}
+                  onChange={(e) => setCompleteDiagnostico(e.target.value)}
+                  placeholder={lang === 'es' ? 'Ej: Pulpitis irreversible en órgano dental 36' : 'e.g., Irreversible pulpitis'}
+                  rows={2}
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              {/* Tratamiento Realizado */}
+              <div className="space-y-1">
+                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">
+                  {lang === 'es' ? 'TRATAMIENTO ODONTOLÓGICO REALIZADO' : 'DENTAL TREATMENT PERFORMED'}
+                </label>
+                <input
+                  type="text"
+                  value={completeTratamiento}
+                  onChange={(e) => setCompleteTratamiento(e.target.value)}
+                  placeholder={lang === 'es' ? 'Ej: Pulpectomía y obturación provisional' : 'e.g., Pulpectomy and obturation'}
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              {/* Notas de Cierre Adicionales */}
+              <div className="space-y-1">
+                <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest block">
+                  {lang === 'es' ? 'OBSERVACIONES Y NOTAS DE CIERRE' : 'CLOSING OBSERVATIONS & NOTES'}
+                </label>
+                <textarea
+                  value={completeNotas}
+                  onChange={(e) => setCompleteNotas(e.target.value)}
+                  placeholder={lang === 'es' ? 'Ej: Se receta analgésico por 3 días. Próxima cita en 1 semana.' : 'e.g., Analgesics prescribed'}
+                  rows={2}
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                />
+              </div>
+
+              {/* Botones de acción */}
+              <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => setCompleteModalOpen(false)}
+                  className="flex-1 py-3 border border-slate-900 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-900 text-[10px] font-black tracking-widest uppercase transition-all"
+                >
+                  {lang === 'es' ? 'CANCELAR' : 'CANCEL'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 text-[10px] font-black tracking-widest uppercase transition-all"
+                >
+                  {submitting 
+                    ? (lang === 'es' ? 'REGISTRANDO...' : 'RECORDING...') 
+                    : labels.saveComplete}
                 </button>
               </div>
             </form>

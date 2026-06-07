@@ -59,11 +59,12 @@ services:
   #    Usado por Google Cloud Agent Builder para RAG sobre índices de pacientes
   # ----------------------------------------------------------------
   elastic-mcp:
-    image: docker.elastic.co/elasticsearch/mcp-server:latest
+    image: node:20-alpine
     container_name: odonto_elastic_mcp
+    command: sh -c "npx -y @elastic/mcp-server-elasticsearch"
     environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
       - ES_URL=http://elasticsearch:9200
-      - ES_API_KEY=
       - MCP_PORT=8001
     ports:
       - "8001:8001"
@@ -104,7 +105,7 @@ services:
       - ./backend/static:/app/static
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8080/ | grep -q 'ok'"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/')\""]
       interval: 15s
       timeout: 5s
       retries: 3

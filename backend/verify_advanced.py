@@ -1,7 +1,8 @@
 import requests
 import json
+import os
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8080")
 
 def test_search_and_fallback():
     print("\n--- A. PROBANDO BÚSQUEDA DE PACIENTES (Elastic & Fallback) ---")
@@ -38,11 +39,14 @@ def test_registrar_y_editar():
     print("\n--- B. PROBANDO REGISTRO Y EDICIÓN DE PACIENTES ---")
     
     # 1. Registrar paciente nuevo
+    import uuid
+    rand_suffix = uuid.uuid4().hex[:6]
+    nombre_steve = f"Steve Jobs {rand_suffix}"
     payload_new = {
         "clinica_id": "OO-CLINIC-001",
-        "nombre": "Steve Jobs",
-        "telefono": "+14085550199",
-        "email": "steve@apple.com",
+        "nombre": nombre_steve,
+        "telefono": f"+1408555{uuid.uuid4().hex[:4]}",
+        "email": f"steve_{rand_suffix}@apple.com",
         "fecha_nacimiento": "1955-02-24",
         "historial_medico": "Paciente requiere profilaxis dental de rutina. Excelente salud general.",
         "alergias": "Ninguna",
@@ -57,32 +61,32 @@ def test_registrar_y_editar():
     try:
         res = requests.post(f"{BASE_URL}/webhook/paciente", json=payload_new)
         data = res.json()
-        print("Registro de Steve Jobs:")
+        print(f"Registro de {nombre_steve}:")
         print(json.dumps(data, indent=2))
         assert res.status_code == 200
         assert data["status"] == "success"
         paciente_id = data["data"]["paciente_id"]
-        print(f"[OK] Paciente Steve Jobs registrado con ID: {paciente_id}")
+        print(f"[OK] Paciente {nombre_steve} registrado con ID: {paciente_id}")
 
-        # 2. Editar el paciente registrado (Steve Jobs) para añadir alergia
+        # 2. Editar el paciente registrado para añadir alergia
         payload_edit = {
             "clinica_id": "OO-CLINIC-001",
             "paciente_id": paciente_id,
-            "nombre": "Steve Jobs",
+            "nombre": nombre_steve,
             "alergias": "Nueces, Polvo"
         }
         res_edit = requests.post(f"{BASE_URL}/webhook/paciente", json=payload_edit)
         data_edit = res_edit.json()
-        print("\nEdición de Steve Jobs:")
+        print(f"\nEdición de {nombre_steve}:")
         print(json.dumps(data_edit, indent=2))
         assert res_edit.status_code == 200
         assert data_edit["status"] == "success"
-        print("[OK] Paciente Steve Jobs editado correctamente.")
+        print(f"[OK] Paciente {nombre_steve} editado correctamente.")
 
-        # 3. Buscar de nuevo a Steve Jobs para verificar los cambios
-        res_check = requests.post(f"{BASE_URL}/tools/search_patient", json={"nombre": "Steve Jobs", "clinica_id": "OO-CLINIC-001"})
+        # 3. Buscar de nuevo para verificar los cambios
+        res_check = requests.post(f"{BASE_URL}/tools/search_patient", json={"nombre": nombre_steve, "clinica_id": "OO-CLINIC-001"})
         data_check = res_check.json()
-        print("\nVerificación Steve Jobs:")
+        print(f"\nVerificación {nombre_steve}:")
         print(json.dumps(data_check, indent=2))
         assert data_check["data"]["paciente"]["alergias"] == "Nueces, Polvo"
         print("[OK] Cambios en el expediente persistidos y verificados con éxito.")
@@ -92,10 +96,18 @@ def test_registrar_y_editar():
 
 def test_agendar_cita():
     print("\n--- C. PROBANDO AGENDAMIENTO DE CITAS ---")
+    from datetime import datetime, timedelta
+    import random
+    
+    random_days = random.randint(10, 150)
+    random_hour = random.randint(9, 17)
+    future_date = (datetime.now() + timedelta(days=random_days)).replace(hour=random_hour, minute=0, second=0, microsecond=0)
+    fecha_cita = future_date.strftime("%Y-%m-%d %H:%M")
+    
     payload = {
         "clinica_id": "OO-CLINIC-001",
         "paciente_id": "P-CSLIM001",
-        "fecha_consulta": "2026-06-01 10:00",
+        "fecha_consulta": fecha_cita,
         "diagnostico": "Revisión periodóntica",
         "tratamiento": "Profilaxis profunda y detartraje",
         "notas_adicionales": "Confirmar asistencia un día antes."
@@ -103,7 +115,7 @@ def test_agendar_cita():
     try:
         res = requests.post(f"{BASE_URL}/tools/schedule_appointment", json=payload)
         data = res.json()
-        print("Cita agendada para Carlos Slim:")
+        print(f"Cita agendada para Carlos Slim en fecha {fecha_cita}:")
         print(json.dumps(data, indent=2))
         assert res.status_code == 200
         assert data["status"] == "success"

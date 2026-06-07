@@ -24,7 +24,7 @@ load_dotenv()
 _PDF_DIR = os.path.abspath(os.path.normpath(r"C:\Users\Predator Pro\OneDrive\Documents\Proyectos\Marcos_proyects\Hackaton odonto\backend\static\documents"))
 
 # URL base del servidor — ajustable via variable de entorno
-_SERVER_URL = os.getenv("PUBLIC_SERVER_URL", "http://localhost:8000")
+_SERVER_URL = os.getenv("PUBLIC_SERVER_URL", "http://localhost:8080")
 
 # ---------------------------------------------------------------------------
 # Textos bilingues
@@ -112,33 +112,44 @@ def generar_documento_clinico(
         file_name = f"{tipo}_{ts}_{uid}.pdf"
         file_path = os.path.abspath(os.path.normpath(os.path.join(_PDF_DIR, file_name)))
 
-        # Cargar el nombre del doctor y de la clínica dinámicamente de los datos de paciente o settings
+        # Cargar el nombre del doctor y de la clínica dinámicamente (Settings-First Source of Truth)
         clinica_id = datos_paciente.get("clinica_id", "OO-CLINIC-001")
-        nombre_doctor = datos_paciente.get("nombre_doctor") or "Dentista Responsable"
-        nombre_clinica = datos_paciente.get("nombre_clinica") or "Odonto-Oracle"
+        
+        # 1. Valores por defecto base
+        nombre_doctor = "Dentista Responsable"
+        nombre_clinica = "Odonto-Oracle"
+        settings_loaded = False
 
-        if not datos_paciente.get("nombre_doctor") or not datos_paciente.get("nombre_clinica"):
-            try:
-                settings_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", f"settings_{clinica_id}.json"))
-                if os.path.exists(settings_path):
-                    with open(settings_path, "r", encoding="utf-8") as sf:
+        # 2. Intentar cargar desde el archivo de configuración de la clínica
+        try:
+            settings_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", f"settings_{clinica_id}.json"))
+            if os.path.exists(settings_path):
+                with open(settings_path, "r", encoding="utf-8") as sf:
+                    s_data = json.load(sf)
+                    nombre_doctor = s_data.get("nombre_doctor") or s_data.get("nombre_dentista") or nombre_doctor
+                    nombre_clinica = s_data.get("nombre_clinica") or nombre_clinica
+                    settings_loaded = True
+            else:
+                # Fallback general
+                general_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "settings.json"))
+                if os.path.exists(general_path):
+                    with open(general_path, "r", encoding="utf-8") as sf:
                         s_data = json.load(sf)
-                        if not datos_paciente.get("nombre_doctor"):
-                            nombre_doctor = s_data.get("nombre_doctor") or s_data.get("nombre_dentista") or nombre_doctor
-                        if not datos_paciente.get("nombre_clinica"):
-                            nombre_clinica = s_data.get("nombre_clinica") or nombre_clinica
-                else:
-                    # Fallback general
-                    general_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "settings.json"))
-                    if os.path.exists(general_path):
-                        with open(general_path, "r", encoding="utf-8") as sf:
-                            s_data = json.load(sf)
-                            if not datos_paciente.get("nombre_doctor"):
-                                nombre_doctor = s_data.get("nombre_doctor") or s_data.get("nombre_dentista") or nombre_doctor
-                            if not datos_paciente.get("nombre_clinica"):
-                                nombre_clinica = s_data.get("nombre_clinica") or nombre_clinica
-            except Exception as e:
-                print(f"[PDF GENERATOR] Warning: No se pudo leer la configuración de settings: {e}")
+                        nombre_doctor = s_data.get("nombre_doctor") or s_data.get("nombre_dentista") or nombre_doctor
+                        nombre_clinica = s_data.get("nombre_clinica") or nombre_clinica
+                        settings_loaded = True
+        except Exception as e:
+            print(f"[PDF GENERATOR] Warning: No se pudo leer la configuración de settings: {e}")
+
+        # 3. Si settings no cargaron o tienen valores genéricos, y datos_paciente provee valores específicos (que no sean el ID técnico)
+        if (not settings_loaded or nombre_doctor == "Dentista Responsable") and datos_paciente.get("nombre_doctor"):
+            nombre_doctor = datos_paciente.get("nombre_doctor")
+            
+        if (not settings_loaded or nombre_clinica == "Odonto-Oracle") and datos_paciente.get("nombre_clinica"):
+            p_clinica = datos_paciente.get("nombre_clinica")
+            # Ignorar si es id técnico que empieza con user_
+            if p_clinica and not p_clinica.startswith("user_"):
+                nombre_clinica = p_clinica
 
         # Normalizar el prefijo Dr./Dra. para evitar duplicados en la firma
         doctor_display = nombre_doctor.strip()
@@ -267,7 +278,7 @@ def generar_documento_clinico(
                 Paragraph(f"<b>{labels['alergias']}:</b>", body_bold_style),
                 Paragraph(datos_paciente.get("alergias", "") or "—", body_text_style),
                 Paragraph(f"<b>{labels['clinica']}:</b>", body_bold_style),
-                Paragraph(clinica_id, body_text_style),
+                Paragraph(nombre_clinica, body_text_style),
             ]
         ]
         

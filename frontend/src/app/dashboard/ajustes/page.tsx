@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useDashboard } from '../context';
 import { useAuth } from '@clerk/nextjs';
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = '/api/proxy';
 
 const t = {
   es: {
@@ -52,6 +52,10 @@ export default function AjustesPage() {
   // Multi-tenant: use Clerk's orgId or userId as the clinic identifier
   const { orgId, userId } = useAuth();
   const clinicaId = orgId || userId || 'OO-CLINIC-001';
+
+  const friendlyClinicaId = clinicaId === 'OO-CLINIC-001'
+    ? clinicaId
+    : `${clinicaId.startsWith('org_') ? 'OO-ORG-' : 'OO-CLINIC-'}${clinicaId.replace('user_', '').replace('org_', '').substring(0, 6).toUpperCase()}`;
 
   const [profile, setProfile] = useState({ nombre: 'Clínica Dental Oaxaca', nombreDoctor: '', especialidad: 'Odontología General' });
   const [prefs, setPrefs] = useState({
@@ -151,7 +155,7 @@ export default function AjustesPage() {
         <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[9px] font-mono font-black tracking-widest text-slate-500 dark:text-zinc-400 uppercase">
-            {lang === 'es' ? 'ID DE CLÍNICA' : 'CLINIC ID'}: {clinicaId}
+            {lang === 'es' ? 'ID DE CLÍNICA' : 'CLINIC ID'}: {friendlyClinicaId}
           </span>
         </div>
       </div>

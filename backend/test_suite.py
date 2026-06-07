@@ -1,7 +1,8 @@
 import requests
 import json
+import os
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8080")
 
 def test_health():
     print("\n--- 1. PROBANDO ENDPOINT DE SALUD (/health) ---")

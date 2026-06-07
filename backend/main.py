@@ -439,6 +439,33 @@ async def webhook_paciente(payload: PacientePayload):
         if not payload.clinica_id:
             return {"status": "error", "message": "El clinica_id es obligatorio para el aislamiento Multi-Tenant."}
 
+        # Validación de duplicados para nuevos registros
+        if not payload.paciente_id:
+            from database_fallback import load_patients
+            existing_patients = load_patients()
+            clinic_patients = [p for p in existing_patients if p.get("clinica_id") == payload.clinica_id]
+            
+            nombre_nuevo = payload.nombre.lower().strip()
+            telefono_nuevo = payload.telefono.strip() if payload.telefono else ""
+            email_nuevo = payload.email.lower().strip() if payload.email else ""
+            
+            for p in clinic_patients:
+                if (p.get("nombre") or "").lower().strip() == nombre_nuevo:
+                    return {
+                        "status": "error",
+                        "message": f"Duplicado: Ya existe un paciente registrado con el nombre '{payload.nombre}' en esta clínica."
+                    }
+                if telefono_nuevo and (p.get("telefono") or "").strip() == telefono_nuevo:
+                    return {
+                        "status": "error",
+                        "message": f"Duplicado: El número de teléfono '{payload.telefono}' ya está registrado con el paciente '{p.get('nombre')}'."
+                    }
+                if email_nuevo and (p.get("email") or "").lower().strip() == email_nuevo:
+                    return {
+                        "status": "error",
+                        "message": f"Duplicado: El correo electrónico '{payload.email}' ya está registrado con el paciente '{p.get('nombre')}'."
+                    }
+
         # Usar paciente_id o generar uno si es nuevo
         pid = payload.paciente_id
         if not pid:
@@ -448,9 +475,10 @@ async def webhook_paciente(payload: PacientePayload):
         doc = payload.dict()
         
         # 1. Guardar en base JSON local (Fallback y persistencia garantizada)
+        merged_doc = doc
         try:
             from database_fallback import save_fallback_patient
-            save_fallback_patient(doc)
+            merged_doc = save_fallback_patient(doc)
             json_saved = True
         except Exception as fallback_err:
             print(f"[JSON DB Fallback] Error al guardar paciente: {fallback_err}")
@@ -466,10 +494,14 @@ async def webhook_paciente(payload: PacientePayload):
             es_online = False
         if es_online:
             try:
+                doc_es = merged_doc.copy()
+                if "_id" in doc_es:
+                    del doc_es["_id"]
                 es.index(
                     index=PACIENTES_INDEX,
                     id=f"{payload.clinica_id}_{pid}",
-                    document=doc,
+                    document=doc_es,
+                    refresh=True,
                 )
                 es_saved = True
             except Exception as es_err:
@@ -482,13 +514,15 @@ async def webhook_paciente(payload: PacientePayload):
                 "paciente_id": pid,
                 "clinica_id": payload.clinica_id,
                 "db_file_path": PACIENTES_JSON_PATH,
-                "paciente": doc,
+                "paciente": merged_doc,
                 "persistencia": {"elastic": es_saved, "json_local": json_saved}
             },
             "message": f"Paciente '{payload.nombre}' registrado y persistido exitosamente."
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"status": "error", "message": f"No se pudo registrar el paciente. Detalle: {str(e)}"}
 
 
@@ -778,6 +812,8 @@ async def schedule_appointment_tool(payload: ScheduleAppointmentPayload):
                 from database import CONSULTAS_INDEX
                 # Sanitizar fecha_consulta para cumplir con el formato estricto ISO 8601
                 doc_elastic = doc.copy()
+                if "_id" in doc_elastic:
+                    del doc_elastic["_id"]
                 fecha_sanitizada = payload.fecha_consulta.strip()
                 if " " in fecha_sanitizada:
                     fecha_sanitizada = fecha_sanitizada.replace(" ", "T")
@@ -789,7 +825,8 @@ async def schedule_appointment_tool(payload: ScheduleAppointmentPayload):
                 es.index(
                     index=CONSULTAS_INDEX,
                     id=c_id,
-                    document=doc_elastic
+                    document=doc_elastic,
+                    refresh=True,
                 )
                 es_saved = True
             except Exception as es_err:
@@ -968,6 +1005,188 @@ async def cancel_appointment_tool(payload: CancelAppointmentPayload):
         }
     except Exception as e:
         return {"status": "error", "message": f"No se pudo cancelar la cita. Detalle: {str(e)}"}
+
+
+class CompleteAppointmentPayload(BaseModel):
+    clinica_id: str = Field("OO-CLINIC-001", description="Identificador único de la clínica.")
+    appointment_id: str = Field(..., description="ID de la cita a marcar como completada.")
+    diagnostico: Optional[str] = Field(None, description="Diagnóstico final clínico.")
+    tratamiento: Optional[str] = Field(None, description="Tratamiento realizado.")
+    notas_adicionales: Optional[str] = Field(None, description="Notas clínicas adicionales.")
+
+
+@app.post(
+    "/tools/complete_appointment",
+    summary="Marcar cita como completada o consultada",
+    description="Actualiza el estado de una cita odontológica a 'completada' en Elasticsearch y base de datos local JSON.",
+    operation_id="completar_cita"
+)
+async def complete_appointment_tool(payload: CompleteAppointmentPayload):
+    try:
+        from database_fallback import update_fallback_consultation
+        from datetime import datetime
+        
+        # 1. Actualizar en local JSON
+        update_data = {
+            "estado": "completada",
+            "fecha_completada": datetime.now().isoformat()
+        }
+        if payload.diagnostico is not None:
+            update_data["diagnostico"] = payload.diagnostico
+        if payload.tratamiento is not None:
+            update_data["tratamiento"] = payload.tratamiento
+        if payload.notas_adicionales is not None:
+            update_data["notas_adicionales"] = payload.notas_adicionales
+            
+        json_updated = update_fallback_consultation(payload.appointment_id, payload.clinica_id, update_data)
+        
+        # 2. Actualizar en Elasticsearch
+        es = get_elastic_client()
+        es_updated = False
+        es_online = False
+        try:
+            es_online = es.ping()
+        except Exception:
+            es_online = False
+            
+        if es_online:
+            try:
+                from database import CONSULTAS_INDEX
+                es_doc = {
+                    "estado": "completada",
+                    "fecha_completada": datetime.now().isoformat()
+                }
+                if payload.diagnostico is not None:
+                    es_doc["diagnostico"] = payload.diagnostico
+                if payload.tratamiento is not None:
+                    es_doc["tratamiento"] = payload.tratamiento
+                if payload.notas_adicionales is not None:
+                    es_doc["notas_adicionales"] = payload.notas_adicionales
+                
+                es.update(
+                    index=CONSULTAS_INDEX,
+                    id=payload.appointment_id,
+                    body={"doc": es_doc}
+                )
+                es_updated = True
+            except Exception as es_err:
+                print(f"[Elasticsearch] Error al marcar cita como completada: {es_err}")
+
+        return {
+            "status": "success",
+            "data": {
+                "appointment_id": payload.appointment_id,
+                "persistencia": {"elastic": es_updated, "json_local": json_updated}
+            },
+            "message": f"Cita '{payload.appointment_id}' marcada como completada exitosamente."
+        }
+    except Exception as e:
+        return {"status": "error", "message": f"No se pudo completar la cita. Detalle: {str(e)}"}
+
+
+class DeletePacientePayload(BaseModel):
+    clinica_id: str = Field(..., description="ID de la clínica (tenant) para aislar la eliminación.")
+    paciente_id: str = Field(..., description="ID del paciente a eliminar.")
+
+
+@app.post(
+    "/tools/delete_patient",
+    summary="Eliminar paciente y expediente clínico",
+    description="Elimina un paciente, su expediente y todas sus citas de la base local JSON y Elasticsearch.",
+    operation_id="eliminar_paciente"
+)
+async def delete_patient_tool(payload: DeletePacientePayload):
+    try:
+        from database_fallback import delete_fallback_patient
+        
+        # 1. Eliminar de local JSON (por paciente_id y clinica_id)
+        json_deleted = delete_fallback_patient(payload.paciente_id, payload.clinica_id)
+        
+        # 2. Eliminar de Elasticsearch (Pacientes y Citas)
+        es = get_elastic_client()
+        es_patient_deleted = False
+        es_appointments_deleted = False
+        es_online = False
+        try:
+            es_online = es.ping()
+        except Exception:
+            es_online = False
+            
+        if es_online:
+            from database import PACIENTES_INDEX, CONSULTAS_INDEX
+            
+            # A. Eliminar el documento del paciente
+            try:
+                es.delete(index=PACIENTES_INDEX, id=f"{payload.clinica_id}_{payload.paciente_id}")
+                es_patient_deleted = True
+            except Exception:
+                pass
+                
+            if not es_patient_deleted:
+                try:
+                    search_res = es.search(
+                        index=PACIENTES_INDEX,
+                        body={
+                            "query": {
+                                "bool": {
+                                    "must": [
+                                        {"term": {"clinica_id": payload.clinica_id}},
+                                        {"term": {"paciente_id": payload.paciente_id}}
+                                    ]
+                                }
+                            }
+                        }
+                    )
+                    hits = search_res["hits"]["hits"]
+                    for hit in hits:
+                        try:
+                            es.delete(index=PACIENTES_INDEX, id=hit["_id"])
+                            es_patient_deleted = True
+                        except Exception:
+                            pass
+                except Exception as es_err:
+                    print(f"[ES] Error buscando paciente para eliminar: {es_err}")
+
+            # B. Eliminar citas asociadas en ES
+            try:
+                search_res = es.search(
+                    index=CONSULTAS_INDEX,
+                    body={
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {"term": {"clinica_id": payload.clinica_id}},
+                                    {"term": {"paciente_id": payload.paciente_id}}
+                                ]
+                            }
+                        },
+                        "size": 500
+                    }
+                )
+                hits = search_res["hits"]["hits"]
+                for hit in hits:
+                    try:
+                        es.delete(index=CONSULTAS_INDEX, id=hit["_id"])
+                    except Exception:
+                        pass
+                es_appointments_deleted = True
+            except Exception as es_err:
+                print(f"[ES] Error eliminando citas asociadas al paciente: {es_err}")
+
+        return {
+            "status": "success",
+            "data": {
+                "paciente_id": payload.paciente_id,
+                "persistencia": {
+                    "elastic_paciente": es_patient_deleted, 
+                    "elastic_citas": es_appointments_deleted,
+                    "json_local": json_deleted
+                }
+            },
+            "message": f"Paciente '{payload.paciente_id}' y sus citas asociadas eliminados exitosamente."
+        }
+    except Exception as e:
+        return {"status": "error", "message": f"No se pudo eliminar el paciente. Detalle: {str(e)}"}
 
 
 @app.get(
@@ -1177,10 +1396,14 @@ async def run_pdf_generator_tool(payload: PDFPayload):
                     
                 if es_online:
                     try:
+                        es_doc = paciente_actual.copy()
+                        if "_id" in es_doc:
+                            del es_doc["_id"]
                         es.index(
                             index=PACIENTES_INDEX,
                             id=f"{c_id}_{p_id}",
-                            document=paciente_actual
+                            document=es_doc,
+                            refresh=True,
                         )
                         print(f"[PDF ARCHIVE] Guardado exitoso en Elasticsearch para {p_id}")
                     except Exception as es_err:

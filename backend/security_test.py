@@ -15,8 +15,9 @@ Tests:
 import requests
 import json
 import time
+import os
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8080")
 VALID_CLINICA = "OO-CLINIC-001"
 ATTACKER_CLINICA = "EVIL-CORP-999"
 
@@ -36,17 +37,20 @@ def info(msg: str): print(f"  {YEL}[INFO]{RESET} {msg}")
 def test_multi_tenant_isolation():
     print(f"\n{BOLD}--- E. AISLAMIENTO MULTI-TENANT ---{RESET}")
 
+    import uuid
+    rand_name = f"Paciente Legítimo {uuid.uuid4().hex[:6]}"
+
     # E1: Registrar paciente en clínica real
     res = requests.post(f"{BASE_URL}/webhook/paciente", json={
         "clinica_id": VALID_CLINICA,
-        "nombre": "Paciente Legítimo",
-        "telefono": "+529510000001",
+        "nombre": rand_name,
+        "telefono": f"+529510{uuid.uuid4().hex[:6]}",
         "alergias": "Ninguna"
     })
     data = res.json()
-    pid = data.get("paciente_id", "")
+    pid = data.get("data", {}).get("paciente_id", "")
     if data.get("status") == "success" and pid:
-        ok(f"E1 — Paciente '{pid}' registrado en clínica válida {VALID_CLINICA}")
+        ok(f"E1 — Paciente '{pid}' registrado en clínica válida {VALID_CLINICA} con nombre '{rand_name}'")
     else:
         fail(f"E1 — No se pudo registrar paciente de prueba: {data}")
         return
@@ -54,7 +58,7 @@ def test_multi_tenant_isolation():
     # E2: Buscar ese paciente usando una clínica ATACANTE — debe devolver 0 resultados
     time.sleep(0.3)
     res2 = requests.post(f"{BASE_URL}/tools/search_patient", json={
-        "nombre": "Paciente Legítimo",
+        "nombre": rand_name,
         "clinica_id": ATTACKER_CLINICA  # ← Clínica diferente, debe fallar la búsqueda
     })
     data2 = res2.json()
@@ -127,17 +131,20 @@ def test_input_validation():
         ok(f"F4 — Nombre de 10K chars: Backend rechazó con HTTP {res4.status_code}")
 
     # F5: Inyección de JSON en historial_medico al registrar paciente
+    import uuid
+    rand_inj_name = f"Test Injection {uuid.uuid4().hex[:6]}"
     res5 = requests.post(f"{BASE_URL}/webhook/paciente", json={
         "clinica_id": VALID_CLINICA,
-        "nombre": "Test Injection",
+        "nombre": rand_inj_name,
         "historial_medico": '{"clinica_id": "EVIL-CORP-999", "admin": true}',
         "alergias": "None"
     })
     data5 = res5.json()
-    if data5.get("clinica_id") == VALID_CLINICA:
+    extracted_clinica_id = data5.get("data", {}).get("clinica_id")
+    if extracted_clinica_id == VALID_CLINICA:
         ok(f"F5 — JSON Injection en historial: clinica_id permanece '{VALID_CLINICA}' (no inyectado)")
     else:
-        fail(f"F5 — clinica_id fue modificado a: {data5.get('clinica_id')}")
+        fail(f"F5 — clinica_id fue modificado a: {extracted_clinica_id}. Response: {data5}")
 
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  allowedDevOrigins: [
+    "localhost:3000",
+    "tierra-nonabsorptive-viola.ngrok-free.dev",
+    "*.ngrok-free.dev",
+    "*.ngrok-free.app",
+    "*"
+  ],
+  turbopack: {
+    root: process.cwd()
+  }
 };
 
 export default nextConfig;

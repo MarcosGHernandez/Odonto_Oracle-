@@ -5,7 +5,7 @@ import { useDashboard } from '../context';
 import { AddPatientForm } from '@/components/AddPatientLogic';
 import { useAuth } from '@clerk/nextjs';
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
+const BACKEND_URL = '/api/proxy';
 
 const t = {
   es: {

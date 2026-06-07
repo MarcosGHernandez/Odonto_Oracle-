@@ -212,10 +212,10 @@ def get_fallback_patients(clinica_id: str) -> List[Dict[str, Any]]:
     return [p for p in pacientes if p.get("clinica_id") == clinica_id]
 
 
-def save_fallback_patient(doc: Dict[str, Any]) -> str:
+def save_fallback_patient(doc: Dict[str, Any]) -> Dict[str, Any]:
     """
     Guarda o actualiza un paciente en la base local (Upsert).
-    Retorna el paciente_id creado o actualizado.
+    Retorna el documento del paciente creado o actualizado.
     """
     pacientes = load_patients()
     clinica_id = doc.get("clinica_id", "OO-CLINIC-001")
@@ -235,15 +235,18 @@ def save_fallback_patient(doc: Dict[str, Any]) -> str:
             break
             
     if index_to_update >= 0:
-        # Preservar campos que no vengan en el update si los hay
+        # Preservar campos existentes si el valor entrante es None
         old_doc = pacientes[index_to_update]
-        updated_doc = {**old_doc, **doc}
+        clean_doc = {k: v for k, v in doc.items() if v is not None}
+        updated_doc = {**old_doc, **clean_doc}
         pacientes[index_to_update] = updated_doc
+        result_doc = updated_doc
     else:
         pacientes.append(doc)
+        result_doc = doc
         
     save_patients(pacientes)
-    return pid
+    return result_doc
 
 
 def search_fallback_patient(nombre: str, clinica_id: str) -> Optional[Dict[str, Any]]:
@@ -313,6 +316,28 @@ def delete_fallback_consultation(appointment_id: str, clinica_id: str) -> bool:
         if not (c.get("clinica_id") == clinica_id and (c.get("id") == appointment_id or c.get("_id") == appointment_id))
     ]
     if len(consultas) < initial_len:
+        save_consultations(consultas)
+        return True
+    return False
+
+
+def delete_fallback_patient(paciente_id: str, clinica_id: str) -> bool:
+    """Elimina un paciente y todas sus consultas asociadas de la base local JSON."""
+    pacientes = load_patients()
+    initial_patients_len = len(pacientes)
+    pacientes = [
+        p for p in pacientes
+        if not (p.get("clinica_id") == clinica_id and p.get("paciente_id") == paciente_id)
+    ]
+    
+    consultas = load_consultations()
+    consultas = [
+        c for c in consultas
+        if not (c.get("clinica_id") == clinica_id and c.get("paciente_id") == paciente_id)
+    ]
+    
+    if len(pacientes) < initial_patients_len:
+        save_patients(pacientes)
         save_consultations(consultas)
         return True
     return False

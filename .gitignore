@@ -13,6 +13,7 @@ frontend/out/
 # IDE and System Files
 .idea/
 .vscode/
+.cursor/
 *.suo
 *.ntvs*
 *.njsproj
@@ -41,3 +42,10 @@ backend/static/pdfs/*.pdf
 *.log
 .gemini/
 .agents/
+
+# Environment files
+.env
+.env.local
+backend/.env
+frontend/.env.local
+
