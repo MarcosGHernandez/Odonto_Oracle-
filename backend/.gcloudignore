@@ -1,0 +1,42 @@
+# Ignore files during gcloud builds submit
+.gcloudignore
+.git
+.gitignore
+.dockerignore
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+usr/
+lib/
+lib64/
+share/
+include/
+bin/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local database environments and secrets
+.env
+.env.*
+*.log
+
+# Local static documents and pdfs
+static/pdfs/
+static/documents/
+static/emails/
+openapi.json
+test_suite.py
+security_test.py
+verify_advanced.py
+setup_elastic.py
+verify_db_consistency.py
