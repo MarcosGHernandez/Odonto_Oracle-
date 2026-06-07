@@ -7,16 +7,201 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000",
-      "description": "Local server"
+      "url": "http://localhost:8080",
+      "description": "Public URL"
     }
   ],
   "paths": {
+    "/": {
+      "get": {
+        "summary": "Health check del sistema",
+        "description": "Verifica que el backend de Odonto-Oracle está operativo y retorna la versión actual.",
+        "operationId": "health_check_root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "summary": "Obtener ajustes de la clínica",
+        "description": "Retorna el perfil del consultorio y los números emisores de WhatsApp/SMS configurados.",
+        "operationId": "obtener_settings",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "OO-CLINIC-001",
+              "title": "Clinica Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Actualizar ajustes de la clínica",
+        "description": "Guarda el perfil del consultorio y los números emisores de WhatsApp/SMS en el almacenamiento persistente.",
+        "operationId": "guardar_settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinica/metricas": {
+      "get": {
+        "summary": "Obtener métricas de la clínica en tiempo real",
+        "description": "Calcula estadísticas dinámicas leyendo la base de datos de pacientes filtrada por clinica_id.",
+        "operationId": "obtener_metricas_clinica",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "OO-CLINIC-001",
+              "title": "Clinica Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinica/agenda/{clinica_id}": {
+      "get": {
+        "summary": "Obtener agenda completa de la clínica",
+        "description": "Devuelve todas las citas de la clínica. Intenta consultar Elasticsearch y cae en JSON local si no está activo.",
+        "operationId": "obtener_agenda",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinica Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Verificar salud de la API",
         "description": "Retorna el estado operativo de los servicios del backend de Odonto-Oracle.",
         "operationId": "health_check",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/test/read_db": {
+      "get": {
+        "summary": "Endpoint temporal para verificar base de datos local JSON",
+        "description": "Devuelve el estado crudo completo de la base de datos local JSON de citas, pacientes y precios.",
+        "operationId": "test_read_db",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -104,6 +289,53 @@
         }
       }
     },
+    "/pacientes/{clinica_id}/{paciente_id}": {
+      "get": {
+        "summary": "Obtener expediente de un paciente específico",
+        "description": "Devuelve el expediente clínico detallado y actualizado de un paciente específico (antecedentes, alergias, vitales, historial de documentos).",
+        "operationId": "obtener_paciente",
+        "parameters": [
+          {
+            "name": "clinica_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Clinica Id"
+            }
+          },
+          {
+            "name": "paciente_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Paciente Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/search_patient": {
       "post": {
         "summary": "Buscar expediente de paciente",
@@ -151,6 +383,154 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ScheduleAppointmentPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/modify_appointment": {
+      "post": {
+        "summary": "Modificar cita o consulta dental",
+        "description": "Actualiza campos específicos de una cita odontológica existente en Elasticsearch y base de datos local JSON.",
+        "operationId": "modificar_cita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyAppointmentPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/cancel_appointment": {
+      "post": {
+        "summary": "Cancelar cita o consulta dental",
+        "description": "Elimina una cita de la base de datos local JSON y Elasticsearch.",
+        "operationId": "cancelar_cita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelAppointmentPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/complete_appointment": {
+      "post": {
+        "summary": "Marcar cita como completada o consultada",
+        "description": "Actualiza el estado de una cita odontológica a 'completada' en Elasticsearch y base de datos local JSON.",
+        "operationId": "completar_cita",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteAppointmentPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/delete_patient": {
+      "post": {
+        "summary": "Eliminar paciente y expediente clínico",
+        "description": "Elimina un paciente, su expediente y todas sus citas de la base local JSON y Elasticsearch.",
+        "operationId": "eliminar_paciente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeletePacientePayload"
               }
             }
           },
@@ -339,6 +719,102 @@
   },
   "components": {
     "schemas": {
+      "CancelAppointmentPayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica.",
+            "default": "OO-CLINIC-001"
+          },
+          "appointment_id": {
+            "type": "string",
+            "title": "Appointment Id",
+            "description": "ID de la cita a cancelar."
+          }
+        },
+        "type": "object",
+        "required": [
+          "appointment_id"
+        ],
+        "title": "CancelAppointmentPayload"
+      },
+      "CompleteAppointmentPayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica.",
+            "default": "OO-CLINIC-001"
+          },
+          "appointment_id": {
+            "type": "string",
+            "title": "Appointment Id",
+            "description": "ID de la cita a marcar como completada."
+          },
+          "diagnostico": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostico",
+            "description": "Diagnóstico final clínico."
+          },
+          "tratamiento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tratamiento",
+            "description": "Tratamiento realizado."
+          },
+          "notas_adicionales": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notas Adicionales",
+            "description": "Notas clínicas adicionales."
+          }
+        },
+        "type": "object",
+        "required": [
+          "appointment_id"
+        ],
+        "title": "CompleteAppointmentPayload"
+      },
+      "DeletePacientePayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "ID de la clínica (tenant) para aislar la eliminación."
+          },
+          "paciente_id": {
+            "type": "string",
+            "title": "Paciente Id",
+            "description": "ID del paciente a eliminar."
+          }
+        },
+        "type": "object",
+        "required": [
+          "clinica_id",
+          "paciente_id"
+        ],
+        "title": "DeletePacientePayload"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -351,6 +827,74 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "ModifyAppointmentPayload": {
+        "properties": {
+          "clinica_id": {
+            "type": "string",
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica.",
+            "default": "OO-CLINIC-001"
+          },
+          "appointment_id": {
+            "type": "string",
+            "title": "Appointment Id",
+            "description": "ID de la cita a modificar (ej. 'C-...')."
+          },
+          "fecha_consulta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Consulta",
+            "description": "Nueva fecha y hora de la cita."
+          },
+          "diagnostico": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnostico",
+            "description": "Nuevo diagnóstico o motivo."
+          },
+          "tratamiento": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tratamiento",
+            "description": "Nuevo tratamiento."
+          },
+          "notas_adicionales": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notas Adicionales",
+            "description": "Nuevas notas clínicas."
+          }
+        },
+        "type": "object",
+        "required": [
+          "appointment_id"
+        ],
+        "title": "ModifyAppointmentPayload"
       },
       "NotifierPayload": {
         "properties": {
@@ -376,6 +920,19 @@
             "title": "Canal",
             "description": "Canal de comunicación a utilizar para la entrega: 'whatsapp' (predeterminado) o 'sms'.",
             "default": "whatsapp"
+          },
+          "clinica_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinica Id",
+            "description": "Identificador único de la clínica para garantizar el aislamiento Multi-Tenant.",
+            "default": "OO-CLINIC-001"
           }
         },
         "type": "object",
@@ -682,6 +1239,121 @@
           "nombre"
         ],
         "title": "SearchPatientPayload"
+      },
+      "SettingsPayload": {
+        "properties": {
+          "clinica_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clinica Id",
+            "description": "ID de la clínica.",
+            "default": "OO-CLINIC-001"
+          },
+          "twilio_whatsapp_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twilio Whatsapp Number",
+            "description": "Número de teléfono emisor de WhatsApp en Twilio (ej. whatsapp:+14155238886)."
+          },
+          "twilio_sms_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twilio Sms Number",
+            "description": "Número de teléfono emisor de SMS en Twilio."
+          },
+          "nombre_clinica": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Clinica",
+            "description": "Nombre formal del consultorio dental o clínica."
+          },
+          "nombre_doctor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nombre Doctor",
+            "description": "Nombre completo del doctor o responsable del consultorio. Se usa en recetas, presupuestos y saludos del agente."
+          },
+          "especialidad": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Especialidad",
+            "description": "Especialidad clínica principal."
+          },
+          "region_scraper": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Scraper",
+            "description": "Región predeterminada para el web scraper de insumos dentales (MX o US)."
+          },
+          "canal_notificacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canal Notificacion",
+            "description": "Canal preferido de notificación por defecto (whatsapp, sms, email)."
+          },
+          "telefono_contacto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefono Contacto",
+            "description": "Número de teléfono de la clínica para contacto de pacientes (WhatsApp)."
+          }
+        },
+        "type": "object",
+        "title": "SettingsPayload"
       },
       "ValidationError": {
         "properties": {
