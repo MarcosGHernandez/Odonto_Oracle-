@@ -1086,17 +1086,42 @@ export async function POST(req: Request) {
     let currentStep = 0;
     const maxSteps = 5;
     let continueLoop = true;
+    let activeModel = 'gemini-3.5-flash';
 
     while (continueLoop && currentStep < maxSteps) {
-      console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep}`);
+      console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep} using model: ${activeModel}`);
       
-      const stepResult = await generateText({
-        model: google('gemini-3.1-flash-lite'),
-        maxRetries: 0,
-        system: systemPrompt,
-        messages: currentMessages,
-        tools: toolsDefinition
-      });
+      let stepResult;
+      try {
+        stepResult = await generateText({
+          model: google(activeModel),
+          maxRetries: 0,
+          system: systemPrompt,
+          messages: currentMessages,
+          tools: toolsDefinition
+        });
+      } catch (err: any) {
+        const isQuotaError =
+          err?.message?.includes('quota') ||
+          err?.message?.includes('Quota') ||
+          err?.message?.includes('limit') ||
+          err?.message?.includes('429') ||
+          err?.message?.includes('ResourceExhausted');
+
+        if (isQuotaError && activeModel === 'gemini-3.5-flash') {
+          console.warn(`[WARN] Model ${activeModel} hit quota/limit. Falling back to gemini-3-pro.`);
+          activeModel = 'gemini-3-pro';
+          stepResult = await generateText({
+            model: google(activeModel),
+            maxRetries: 0,
+            system: systemPrompt,
+            messages: currentMessages,
+            tools: toolsDefinition
+          });
+        } else {
+          throw err;
+        }
+      }
 
       if (stepResult.steps && stepResult.steps.length > 0) {
         for (const step of stepResult.steps) {
