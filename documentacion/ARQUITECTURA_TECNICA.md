@@ -92,10 +92,28 @@ Los datos dentro de Elasticsearch están mapeados con soporte para **búsqueda s
 
 ---
 
-## 4. Google Cloud Agent Builder
+## 4. Almacenamiento Persistente en la Nube (Google Cloud Storage)
 
-El agente clínico inteligente está orquestado mediante **Google Cloud Agent Builder** (alimentado por Gemini 1.5 Pro). La integración se realiza mediante la especificación de OpenAPI autogenerada por FastAPI (`openapi.json`):
+Para evitar la pérdida de recetas, presupuestos e historias clínicas en PDF debido a la naturaleza efímera de los contenedores de Cloud Run, implementamos un almacenamiento desacoplado en **Google Cloud Storage (GCS)**:
+1.  **Generación Local Temporal:** El backend compila el PDF de ReportLab en la carpeta temporal del contenedor Linux `/tmp`.
+2.  **Carga mediante SDK:** El backend utiliza el SDK de `google-cloud-storage` para subir el archivo de forma directa al bucket `odontooracle-documentos-prod`.
+3.  **Lectura Pública Protegida:** Los objetos del bucket se sirven de forma pública con permisos de solo lectura (`Storage Object Viewer` para `allUsers`), permitiendo descargas transparentes por HTTP sin fricciones de autenticación para el paciente o doctor.
+4.  **Limpieza del Contenedor:** El archivo local de `/tmp` es eliminado inmediatamente después de la subida para evitar que la memoria RAM asignada al contenedor de Cloud Run se sature por almacenamiento de archivos.
 
-1.  **Conexión de Herramientas (Tools):** Agent Builder importa la especificación OpenAPI expuesta por Next.js/FastAPI para invocar de forma autónoma acciones clínicas en el backend (ej. agendar citas, cancelar citas, cotizar precios y generar PDFs).
-2.  **RAG Semántico (MCP Integration):** Mediante la conexión al túnel de ngrok del puerto `8001` (MCP), Agent Builder lee directamente el contexto de los expedientes y agenda del día del doctor de guardia, permitiendo que la respuesta clínica esté fundamentada (grounding) con datos verídicos y exactos, previniendo al 100% alucinaciones médicas.
-3.  **Seguridad de Entrada/Salida:** La especificación de Agent Builder define que todas las respuestas del agente de cara al médico deben ser formateadas en lenguaje natural estructurado (prosa libre de emojis) y bloquea automáticamente respuestas con código de programación o comandos del sistema.
+---
+
+## 5. Orquestación del Agente de IA con google-adk
+
+El sistema utiliza el SDK **Google Agent Development Kit (ADK)** para estructurar y ejecutar el comportamiento del agente de inteligencia artificial directamente a nivel de código (`backend/agent/agent.py`):
+*   **Carga Dinámica de OpenAPI:** En lugar de mapear funciones de forma manual, el SDK carga y analiza de manera directa la especificación OpenAPI (`openapi.json`) de producción usando la clase `OpenAPIToolset(spec_str=spec_str)`. Esto convierte de manera automática todos los endpoints del backend en herramientas listas para ser consumidas por el modelo.
+*   **Consola Interactiva e Interfaz de Diagnóstico:** El SDK habilita el comando `adk run` para interactuar con el agente desde la terminal, y `adk web` para levantar un servidor de diagnóstico local que permite realizar trazas completas de las llamadas a herramientas y el proceso de razonamiento del LLM.
+
+---
+
+## 6. Orquestación de Modelos y Fallback Seguro (Gemini 3.5 Flash a Gemini 3 Pro)
+
+Para asegurar la disponibilidad continua de la plataforma ante posibles limitaciones de cuota o caídas del servicio:
+1.  **Modelo Principal:** El sistema realiza las llamadas iniciales del chat utilizando el modelo de última generación **Gemini 3.5 Flash**, que ofrece tiempos de respuesta mínimos y excelente precisión para llamadas a funciones OpenAPI.
+2.  **Orquestador de Fallback Server-Side:** En el Route Handler de la API del chat, la aplicación intercepta cualquier error de red, límite de cuotas (HTTP 429) o fallos de respuesta del modelo principal.
+3.  **Cambio Silencioso:** Ante un fallo, el orquestador reintenta la misma consulta de forma silenciosa redirigiéndola hacia **Gemini 3 Pro** (o viceversa según disponibilidad). El flujo de fallback se ejecuta completamente en el servidor, de modo que el médico experimenta una conversación ininterrumpida sin interrupciones ni logs de error visibles en la interfaz de usuario.
+
