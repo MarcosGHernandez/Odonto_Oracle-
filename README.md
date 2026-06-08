@@ -1,101 +1,101 @@
-# Odonto-Oracle: CDSS & Agente Administrativo Dental
+# Odonto-Oracle: Dental CDSS & Autonomous Administrative Agent
 
-Odonto-Oracle es un Sistema de Soporte a Decisiones Clínicas (CDSS) y un agente administrativo autónomo de nivel empresarial diseñado para consultorios y clínicas dentales. El sistema asiste a los odontólogos en la gestión de expedientes de pacientes, el agendamiento y conclusión de consultas, la cotización de insumos, la comunicación automatizada post-operatoria y la toma de decisiones clínicas respaldadas por inteligencia artificial.
-
----
-
-## 🛠️ Stack Tecnológico y Arquitectura
-
-El sistema está diseñado bajo una arquitectura desacoplada, modular y de alta disponibilidad:
-
-*   **Frontend**: Next.js (App Router), React, Tailwind CSS. Cuenta con una interfaz responsiva premium adaptada para dispositivos móviles (Android/iOS), bilingüe (Español/Inglés) y soporte de temas (claro/oscuro).
-*   **Autenticación**: Clerk (Multi-Tenant). Administra el control de acceso y deriva de forma segura el identificador de la clínica (`clinica_id`) de la sesión activa del doctor.
-*   **Backend / API**: FastAPI (Python 3.10+). Expone endpoints modulares que actúan como herramientas clínicas consumibles por agentes de IA.
-*   **Base de Datos y Vector Search**: Elasticsearch Cloud Serverless. Utilizado como base de datos híbrida para búsquedas de texto estructurado y búsquedas semánticas kNN con vectores densos de 768 dimensiones.
-*   **Persistencia de Documentos**: Google Cloud Storage (GCS). Almacena de forma persistente y segura las recetas, presupuestos e historias clínicas en PDF para su consulta desde cualquier dispositivo.
-*   **Orquestación de IA**: Google Agent Development Kit (ADK) integrado con Gemini 3.5 Flash (y fallback server-side a Gemini 3 Pro). Permite ejecutar el agente mediante código o vincularlo mediante el protocolo OpenAPI.
-*   **APIs de Comunicación**: Twilio API para envío de notificaciones y recordatorios automatizados vía WhatsApp y SMS.
+Odonto-Oracle is an enterprise-grade Clinical Decision Support System (CDSS) and autonomous administrative agent designed for dental offices and clinics. The system assists dentists in managing patient records, scheduling and completing appointments, quoting dental supplies, sending automated post-operative communications, and making clinical decisions backed by artificial intelligence.
 
 ---
 
-## 📂 Estructura del Proyecto
+## Technical Stack and Architecture
 
-*   **[frontend](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/frontend)**: Interfaz de usuario en Next.js, componentes visuales, lógica de calendario y comunicación por chat con el agente.
-*   **[backend](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/backend)**: Servidor FastAPI, endpoints de negocio, lógica de scraping y scripts del agente.
-    *   **[backend/agent](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/backend/agent)**: Paquete del agente en google-adk (`agent.py` y `__init__.py`).
-    *   **[backend/tools](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/backend/tools)**: Herramientas del agente (scraper, pdf_generator, notifier, search).
-*   **[documentacion](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/documentacion)**: Manuales, especificaciones y guías de despliegue.
+The system is designed under a decoupled, modular, and high-availability architecture:
+
+*   **Frontend**: Next.js (App Router), React, Tailwind CSS. Features a premium responsive interface tailored for mobile devices (Android/iOS), bilingual support (Spanish/English), and theme options (light/dark).
+*   **Authentication**: Clerk (Multi-Tenant). Manages access control and securely derives the clinic identifier (`clinica_id`) from the doctor's active session.
+*   **Backend / API**: FastAPI (Python 3.10+). Exposes modular endpoints that act as clinical tools consumable by AI agents.
+*   **Database and Vector Search**: Elasticsearch Cloud Serverless. Used as a hybrid database for structured text searches and semantic kNN searches with 768-dimensional dense vectors.
+*   **Document Persistence**: Google Cloud Storage (GCS). Persistently and securely stores prescriptions, dental estimates, and clinical histories in PDF format for access from any device.
+*   **AI Orchestration**: Google Agent Development Kit (ADK) integrated with Gemini 3.5 Flash (with server-side fallback to Gemini 3 Pro). Allows executing the agent via CLI commands or linking it via the OpenAPI protocol.
+*   **Communication APIs**: Twilio API for sending automated notifications and reminders via WhatsApp and SMS.
 
 ---
 
-## 🚀 Guía de Inicio Rápido (Desarrollo Local)
+## Project Structure
 
-### 1. Configuración del Backend
-1. Ingresa a la carpeta del backend y crea el entorno virtual:
+*   **frontend**: Next.js user interface, visual components, calendar logic, and chat communication with the agent.
+*   **backend**: FastAPI server, business endpoints, scraping logic, and agent scripts.
+    *   **backend/agent**: Agent package built with google-adk (`agent.py` and `__init__.py`).
+    *   **backend/tools**: Agent tools (scraper, pdf_generator, notifier, search).
+*   **documentacion**: Manuals, specifications, and deployment guides.
+
+---
+
+## Quick Start Guide (Local Development)
+
+### 1. Backend Configuration
+1. Enter the backend folder and create the virtual environment:
    ```bash
    cd backend
    python -m venv venv
-   # En Windows:
+   # On Windows:
    .\venv\Scripts\activate
    ```
-2. Instala las dependencias:
+2. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Configura el archivo `.env` con tus claves (Elastic Cloud, Gemini, Twilio y Resend).
-4. Corre el backend local en el puerto 8080:
+3. Configure the `.env` file with your credentials (Elastic Cloud, Gemini, Twilio, and Resend).
+4. Run the local backend on port 8080:
    ```bash
    python -m uvicorn main:app --port 8080 --host 127.0.0.1
    ```
 
-### 2. Ejecutar el Agente Localmente (Google ADK CLI)
-Puedes interactuar con el agente desde la consola de comandos usando:
+### 2. Run the Agent Locally (Google ADK CLI)
+You can interact with the agent from the CLI using:
 ```bash
 adk run backend/agent
 ```
 
-O lanzar la interfaz visual de depuración de ADK:
+Or launch the ADK visual debugging interface:
 ```bash
 adk web backend/agent
 ```
 
-### 3. Configuración del Frontend
-1. Ingresa a la carpeta del frontend:
+### 3. Frontend Configuration
+1. Enter the frontend folder:
    ```bash
    cd ../frontend
    npm install
    ```
-2. Configura tu archivo `.env.local` con las claves públicas y secretas de tu instancia de Clerk y la API Key de Gemini.
-3. Inicia el servidor de desarrollo:
+2. Configure your `.env.local` file with the public and secret keys of your Clerk instance and the Gemini API Key.
+3. Start the development server:
    ```bash
    npm run dev
    ```
-4. Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+4. Open http://localhost:3000 in your browser.
 
 ---
 
-## 🧪 Validación y Pruebas Automatizadas
+## Validation and Automated Tests
 
-El backend contiene un conjunto de scripts para validar la integridad de la base de datos y la seguridad:
+The backend contains a set of scripts to validate database integrity and security:
 
-*   **Prueba Avanzada de Integración**:
+*   **Advanced Integration Test**:
     ```bash
     python backend/verify_advanced.py
     ```
-    *Valida de forma simulada el flujo de registro de pacientes, agenda de citas y resolución de expedientes.*
-*   **Auditoría de Seguridad (Multi-Tenant y Robustez)**:
+    *Simulates the patient registration flow, appointment scheduling, and record resolution.*
+*   **Security Audit (Multi-Tenant and Robustness)**:
     ```bash
     python backend/security_test.py
     ```
-    *Comprueba el aislamiento estricto de los datos por `clinica_id` (Multi-Tenancy) y valida el rechazo ante inyecciones de código (SQL/XSS).*
+    *Verifies strict data isolation by `clinica_id` (Multi-Tenancy) and validates rejection of code injection (SQL/XSS).*
 
 ---
 
-## 📚 Documentación Adicional
+## Additional Documentation
 
-Para más detalles, consulta las guías dedicadas de la plataforma:
+For more details, consult the dedicated platform guides:
 
-1.  **[ARQUITECTURA_TECNICA.md](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/documentacion/ARQUITECTURA_TECNICA.md)**: Flujos de datos, búsqueda híbrida y especificación de Elasticsearch MCP.
-2.  **[GUIA_DESPLIEGUE.md](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/documentacion/GUIA_DESPLIEGUE.md)**: Configuración en producción sobre Google Cloud Run, Vercel, GCS y Clerk.
-3.  **[AUDITORIA_SEGURIDAD.md](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/documentacion/AUDITORIA_SEGURIDAD.md)**: Aislamiento multi-tenant de datos y mecanismos de mitigación contra inyección de prompts.
-4.  **[MANUAL_USUARIO.md](file:///c:/Users/Predator%20Pro/OneDrive/Documents/Proyectos/Marcos_proyects/Hackaton%20odonto/documentacion/MANUAL_USUARIO.md)**: Manual del usuario clínico para los odontólogos.
+1.  **TECHNICAL_ARCHITECTURE.md**: Data flows, hybrid search, and Elasticsearch MCP specification.
+2.  **DEPLOYMENT_GUIDE.md**: Production deployment on Google Cloud Run, Vercel, GCS, and Clerk.
+3.  **SECURITY_AUDIT.md**: Multi-tenant data isolation and prompt injection mitigation mechanisms.
+4.  **USER_MANUAL.md**: Clinical user manual for dentists.
