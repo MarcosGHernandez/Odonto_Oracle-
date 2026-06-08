@@ -20,6 +20,9 @@ from reportlab.graphics.shapes import Drawing, Line
 # Cargar variables de entorno
 load_dotenv()
 
+# Google Cloud Storage Configuration
+_BUCKET_NAME = os.getenv("BUCKET_NAME", "")
+
 # Directorio donde se almacenan los PDFs
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _PDF_DIR = os.path.abspath(os.path.join(_BASE_DIR, "static", "documents"))
@@ -364,6 +367,37 @@ def generar_documento_clinico(
         except Exception as fsync_err:
             print(f"[PDF GENERATOR] Warning: No se pudo realizar fsync sobre el archivo: {fsync_err}")
 
+        # Intentar subir a Google Cloud Storage si BUCKET_NAME está configurado
+        if _BUCKET_NAME:
+            try:
+                from google.cloud import storage
+                print(f"[PDF GENERATOR] >>> Subiendo a Google Cloud Storage (Bucket: {_BUCKET_NAME})...")
+                client = storage.Client()
+                bucket = client.bucket(_BUCKET_NAME)
+                blob = bucket.blob(file_name)
+                # Subir archivo
+                blob.upload_from_filename(file_path, content_type='application/pdf')
+                
+                # Generar URL pública permanente de GCS
+                url_publica = f"https://storage.googleapis.com/{_BUCKET_NAME}/{file_name}"
+                print(f"[PDF GENERATOR] >>> Subida a GCS exitosa. URL: {url_publica}")
+                
+                # Eliminar archivo local para liberar memoria
+                try:
+                    os.remove(file_path)
+                    print("[PDF GENERATOR] >>> Archivo local eliminado del contenedor.")
+                except Exception as del_err:
+                    print(f"[PDF GENERATOR] Warning: No se pudo eliminar el archivo local: {del_err}")
+                    
+                return (
+                    f"Success: Documento '{titulo}' generado exitosamente. "
+                    f"URL de descarga: {url_publica}"
+                )
+            except Exception as gcs_err:
+                print(f"[PDF GENERATOR] Error al subir a GCS: {str(gcs_err)}")
+                print("[PDF GENERATOR] >>> Cayendo en fallback de almacenamiento local...")
+
+        # Fallback local
         print(f"\n[PDF GENERATOR] >>> DOCUMENTO CLÍNICO GUARDADO FÍSICAMENTE EN: {os.path.abspath(file_path)}")
         print(f"[PDF GENERATOR] >>> ACCESIBLE PÚBLICAMENTE EN LA URL: {_SERVER_URL}/static/documents/{file_name}\n")
 
