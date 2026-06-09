@@ -1,124 +1,22 @@
 [
   {
-    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
-    "paciente_id": "P-ab3bb0dc",
-    "fecha_consulta": "2026-05-29 09:00",
-    "diagnostico": "Pulpitis reversible en diente 36",
-    "tratamiento": "Obturacion definitiva con resina",
-    "notas_adicionales": "Paciente evoluciono perfectamente. Cita completada con exito.",
-    "_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-ab3bb0dc_58f5a83e",
-    "id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-ab3bb0dc_58f5a83e",
-    "estado": "completada",
-    "fecha_completada": "2026-05-30T22:05:45.424270"
-  },
-  {
-    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
-    "paciente_id": "P-e02c04e5",
-    "fecha_consulta": "2026-06-10 10:00",
-    "diagnostico": "",
-    "tratamiento": "",
-    "notas_adicionales": "",
-    "_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-e02c04e5_fc2271a8",
-    "id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-e02c04e5_fc2271a8"
+    "clinica_id": "OO-CLINIC-001",
+    "paciente_id": "P-CSLIM001",
+    "fecha_consulta": "2026-05-18",
+    "diagnostico": "Gingivitis cronica asociada a placa bacteriana.",
+    "tratamiento": "Profilaxis y aplicacion de barniz de fluor. Instruccion de tecnica de cepillado.",
+    "notes_adicionales": "Paciente cooperador. Se recomienda proxima cita en 6 meses.",
+    "id": "C-carlos01",
+    "_id": "C-carlos01"
   },
   {
     "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-06-01 10:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_777a3ae1",
-    "id": "OO-CLINIC-001_P-CSLIM001_777a3ae1"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-07-07 10:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_a09b0a49",
-    "id": "OO-CLINIC-001_P-CSLIM001_a09b0a49"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-10-21 10:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_b04d1c18",
-    "id": "OO-CLINIC-001_P-CSLIM001_b04d1c18"
-  },
-  {
-    "clinica_id": "EVIL-CORP-999",
-    "paciente_id": "P-eca16540",
-    "fecha_consulta": "2099-12-31 09:00",
-    "diagnostico": "BYPASS TEST",
-    "tratamiento": "",
-    "notas_adicionales": "",
-    "_id": "EVIL-CORP-999_P-eca16540_1943bdfe",
-    "id": "EVIL-CORP-999_P-eca16540_1943bdfe"
-  },
-  {
-    "clinica_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d",
-    "paciente_id": "P-ab3bb0dc",
-    "fecha_consulta": "2026-06-12 09:00",
-    "diagnostico": "sangrado en las encias ",
-    "tratamiento": "consulta ",
-    "notas_adicionales": "",
-    "_id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-ab3bb0dc_c0feacea",
-    "id": "user_3DmxriguRSKAaMN0IEkyKwhhM3d_P-ab3bb0dc_c0feacea"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-07-26 17:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_90e25129",
-    "id": "OO-CLINIC-001_P-CSLIM001_90e25129"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-06-18 12:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_20a57871",
-    "id": "OO-CLINIC-001_P-CSLIM001_20a57871"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-08-13 14:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_2c755ea3",
-    "id": "OO-CLINIC-001_P-CSLIM001_2c755ea3"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-06-18 11:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_cef5b246",
-    "id": "OO-CLINIC-001_P-CSLIM001_cef5b246"
-  },
-  {
-    "clinica_id": "OO-CLINIC-001",
-    "paciente_id": "P-CSLIM001",
-    "fecha_consulta": "2026-07-11 17:00",
-    "diagnostico": "Revisión periodóntica",
-    "tratamiento": "Profilaxis profunda y detartraje",
-    "notas_adicionales": "Confirmar asistencia un día antes.",
-    "_id": "OO-CLINIC-001_P-CSLIM001_682f69ca",
-    "id": "OO-CLINIC-001_P-CSLIM001_682f69ca"
+    "paciente_id": "P-ARMANDO01",
+    "fecha_consulta": "2026-05-19",
+    "diagnostico": "Caries de dentina profunda en organo dentario 36.",
+    "tratamiento": "Remocion de caries, proteccion dentino-pulpar y obturacion con resina de fotocurado Z350 de 3M.",
+    "notas_adicionales": "Ligera sensibilidad post-operatoria esperada. Monitorear.",
+    "id": "C-armando01",
+    "_id": "C-armando01"
   }
 ]
