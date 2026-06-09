@@ -295,13 +295,35 @@ async def obtener_agenda(clinica_id: str):
 
         # 2. Enriquecer con el nombre de los pacientes para una visualización premium
         pacientes_map = {}
-        try:
-            from database_fallback import get_fallback_patients
-            pacientes_lista = get_fallback_patients(clinica_id)
-            for p in pacientes_lista:
-                pacientes_map[p.get("paciente_id")] = p.get("nombre")
-        except Exception as p_err:
-            print(f"[Agenda] Advertencia al mapear nombres de pacientes: {p_err}")
+        if es_online:
+            try:
+                from database import PACIENTES_INDEX
+                p_response = es.search(
+                    index=PACIENTES_INDEX,
+                    body={
+                        "query": {"term": {"clinica_id": clinica_id}},
+                        "size": 1000,
+                        "_source": ["paciente_id", "nombre"]
+                    }
+                )
+                for hit in p_response["hits"]["hits"]:
+                    src = hit["_source"]
+                    p_id = src.get("paciente_id")
+                    p_name = src.get("nombre")
+                    if p_id and p_name:
+                        pacientes_map[p_id] = p_name
+            except Exception as es_p_err:
+                print(f"[Agenda ES] Error al mapear nombres de pacientes desde ES: {es_p_err}")
+
+        # Fallback si no está online o no trajo resultados
+        if not pacientes_map:
+            try:
+                from database_fallback import get_fallback_patients
+                pacientes_lista = get_fallback_patients(clinica_id)
+                for p in pacientes_lista:
+                    pacientes_map[p.get("paciente_id")] = p.get("nombre")
+            except Exception as p_err:
+                print(f"[Agenda Fallback] Advertencia al mapear nombres de pacientes: {p_err}")
 
         # Inyectar nombre de paciente
         for c in consultas:

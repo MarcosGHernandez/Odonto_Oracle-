@@ -146,11 +146,12 @@ export default function ChatInterface() {
         body: JSON.stringify({ messages: newMessages })
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.text || data.message || `HTTP ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(errorText || `HTTP ${response.status}`);
       }
+      
+      const data = await response.json();
 
       if (data.newMessages && Array.isArray(data.newMessages)) {
         // Enriquecer cada mensaje ReAct intermedio con un ID robusto para React
