@@ -168,6 +168,32 @@ ${agendaBlock}
   }
 }
 
+function detectLanguage(text: string, defaultLang: string): string {
+  if (!text) return defaultLang;
+  const words = text.toLowerCase().replace(/[^a-zñáéíóúü\s]/g, '').split(/\s+/);
+  const englishWords = new Set([
+    'the', 'and', 'of', 'to', 'in', 'is', 'you', 'that', 'it', 'he', 'was', 'for', 'on', 'are', 
+    'as', 'with', 'his', 'they', 'i', 'at', 'be', 'this', 'have', 'from', 'compare', 'generate', 
+    'estimate', 'patient', 'best', 'prices', 'between', 'suppliers', 'found', 'units', 'about',
+    'quick', 'action', 'notify', 'prescription', 'history', 'clinic', 'hi', 'hello', 'good', 'morning'
+  ]);
+  const spanishWords = new Set([
+    'el', 'la', 'los', 'las', 'un', 'una', 'y', 'en', 'de', 'que', 'es', 'esta', 'para', 'con', 
+    'por', 'su', 'al', 'del', 'comparar', 'generar', 'presupuesto', 'paciente', 'mejor', 'precios', 
+    'entre', 'proveedores', 'encontrado', 'unidades', 'sobre', 'hola', 'buenos', 'dias', 'tardes',
+    'accion', 'rapida', 'notificar', 'receta', 'historial', 'clinica'
+  ]);
+  let enCount = 0;
+  let esCount = 0;
+  for (const word of words) {
+    if (englishWords.has(word)) enCount++;
+    if (spanishWords.has(word)) esCount++;
+  }
+  if (enCount > esCount) return 'en';
+  if (esCount > enCount) return 'es';
+  return defaultLang;
+}
+
 function getSystemPrompt(clinicaId: string, clinicContext: string, doctorName: string = 'Doctor', clinicName: string = 'Odonto-Oracle', lang: string = 'es') {
   if (lang === 'en') {
     return `You are Odonto-Oracle, the intelligent assistant for the dental clinic with ID ${clinicaId}.
@@ -196,7 +222,7 @@ Workflow Rules and Business Logic:
 6. BEFORE generating prescriptions or estimates for a patient, you MUST search for them in the database using 'buscar_paciente' to validate that they exist and obtain their actual data (clinical ID, phone, allergies). NEVER make up patient data.
 7. If you are asked to quote a dental material, use 'buscar_precio_material' specifying the material and the region (MX or US).
 8. Once you have the patient data and the material quote, proceed to create the formal PDF estimate using 'generar_documento_clinico'.
-9. If requested by the doctor, send the generated estimate or a notification to the patient immediately using 'enviar_notificacion_whatsapp' (for WhatsApp) or 'enviar_notificacion_email' (for Email) with their clinical ID or destination email. If sent via simulated email, you MUST present the Markdown link [View Sent Email](SIMULATION_URL) in your final response for the doctor to visualize the email preview.
+9. If requested by the doctor, send the generated estimate or a notification to the patient immediately using 'enviar_notificacion_whatsapp' (for WhatsApp) or 'enviar_notificacion_email' (for Email) with their clinical ID or destination email. Since the system operates in a Hackathon demo environment, explicitly inform the doctor that the message has been processed in "Sandbox / Simulation Mode" for verification. If sent via email, you MUST present the Markdown link [View Sent Email](SIMULATION_URL) in your final response for the doctor to visualize the premium HTML email preview.
 
 Critical Behavioral Rules:
 10. Always respond in English. Be concise, precise, professional, and clinical. ABSOLUTE PROHIBITION OF EMOJIS: Do not use any emojis in your responses.
@@ -245,7 +271,7 @@ Reglas de Encadenamiento y Lógica de Negocio:
 6. ANTES de generar recetas o presupuestos para un paciente, DEBES buscarlo en la base de datos usando 'buscar_paciente' para validar que existe y obtener sus datos reales (ID clínico, teléfono, alergias). NUNCA inventes datos de un paciente.
 7. Si te piden cotizar un material dental, usa 'buscar_precio_material' especificando el material y la región (MX o US).
 8. Una vez tengas los datos del paciente y la cotización del material, procede a crear el presupuesto PDF formal usando 'generar_documento_clinico'.
-9. Si el doctor lo solicitó, envía de inmediato el presupuesto generado o una notificación al paciente usando 'enviar_notificacion_whatsapp' (para WhatsApp) o 'enviar_notificacion_email' (para Correo Electrónico) con su ID clínico o email de destino. Si se envía por correo simulado, DEBES presentar obligatoriamente en tu respuesta final el enlace Markdown [Ver Correo Enviado](URL_DE_SIMULACION) para que el doctor visualice la previsualización del correo.
+9. Si el doctor lo solicitó, envía de inmediato el presupuesto generado o una notificación al paciente usando 'enviar_notificacion_whatsapp' (para WhatsApp) o 'enviar_notificacion_email' (para Correo Electrónico) con su ID clínico o email de destino. Dado que el sistema opera en un entorno de demostración de Hackathon, infórmale de manera amigable al doctor que la notificación se procesó bajo el "Modo Sandbox / Simulación de Pruebas" para verificación. Si se envía por correo, DEBES presentar obligatoriamente en tu respuesta final el enlace Markdown [Ver Correo Enviado](URL_DE_SIMULACION) para que el doctor visualice la previsualización del correo HTML premium.
 
 Reglas Críticas de Comportamiento:
 10. Responde siempre en español. Sé conciso, preciso, profesional y clínico. PROHIBICIÓN ABSOLUTA DE EMOJIS: No utilices ningún emoji en tus respuestas.
@@ -418,6 +444,20 @@ export async function POST(req: Request) {
 
     if (!messages || !Array.isArray(messages)) {
       return new Response('System Error: El formato de los mensajes es inválido.', { status: 400 });
+    }
+
+    // Dynamic language detection to prevent language mixing and respect query language
+    const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user');
+    const userText = lastUserMessage
+      ? (typeof lastUserMessage.content === 'string'
+        ? lastUserMessage.content
+        : Array.isArray(lastUserMessage.content)
+          ? lastUserMessage.content.filter((p: any) => p.type === 'text').map((p: any) => p.text).join('')
+          : '')
+      : '';
+    if (userText.trim()) {
+      lang = detectLanguage(userText, lang);
+      console.log(`[Language Detection] Overrode active language to: ${lang} for text snippet: "${userText.substring(0, 100)}..."`);
     }
 
     // Clerk Dynamic extraction
