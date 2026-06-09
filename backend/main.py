@@ -451,10 +451,15 @@ class PacientePayload(BaseModel):
         "",
         description="Enfermedades crónicas declaradas por el paciente (ej. Diabetes, Hipertensión)."
     )
+    diabetico: Optional[bool] = Field(
+        False,
+        description="Indica si el paciente es diabético, lo cual representa un riesgo clínico de cuidado en consultorio."
+    )
     vitales: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
         description="Valores de signos vitales (presión arterial, frecuencia cardiaca, oxigenación, temperatura, peso, etc.)."
     )
+
 
 
 @app.post(

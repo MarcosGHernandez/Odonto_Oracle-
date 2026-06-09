@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
+
 const getBackendUrl = () => {
   const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
   return url && !url.startsWith('/') ? url : 'http://127.0.0.1:8080';

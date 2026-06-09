@@ -127,6 +127,8 @@ def ensure_indices() -> str:
                     "medicamentos_actuales":   {"type": "text"},
                     "enfermedades_cronicas":   {"type": "text"},
                     "historial_medico":        {"type": "text"},
+                    "diabetico":               {"type": "boolean"},
+
                     # Signos vitales como objeto dinámico
                     "vitales":                 {"type": "object", "dynamic": True},
                     # Vector para búsqueda semántica (Hybrid RAG)

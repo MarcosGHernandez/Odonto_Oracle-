@@ -43,7 +43,9 @@ interface Paciente {
   historial_medico?: string;
   telefono?: string;
   email?: string;
+  diabetico?: boolean;
 }
+
 
 export default function PacientesPage() {
   const { lang } = useDashboard();
@@ -179,7 +181,14 @@ export default function PacientesPage() {
                   <div className="w-8 h-8 border-2 border-slate-900 dark:border-zinc-700 flex items-center justify-center flex-shrink-0 text-[10px] font-black">
                     {p.nombre?.charAt(0) ?? '?'}
                   </div>
-                  <span className="text-xs font-bold">{p.nombre}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">{p.nombre}</span>
+                    {p.diabetico && (
+                      <span className="text-[8px] font-black text-rose-600 bg-rose-500/10 border border-rose-500/20 px-1 py-0.5 mt-0.5 tracking-wider w-fit rounded-none">
+                        {lang === 'es' ? 'DIABÉTICO' : 'DIABETIC'}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {/* ID Clínico */}
                 <div className="px-6 py-5 flex items-center">

@@ -19,6 +19,7 @@ interface PatientFormData {
   medicamentos_actuales: string;
   enfermedades_cronicas: string;
   historial_medico: string;
+  diabetico: boolean;
   // Signos vitales
   presion_arterial: string;
   frecuencia_cardiaca: string;
@@ -73,6 +74,7 @@ export function useAddPatient() {
           medicamentos_actuales: data.medicamentos_actuales,
           enfermedades_cronicas: data.enfermedades_cronicas,
           historial_medico: data.historial_medico,
+          diabetico: data.diabetico,
           vitales: {
             presion_arterial: data.presion_arterial,
             frecuencia_cardiaca: data.frecuencia_cardiaca,
@@ -633,6 +635,7 @@ export function AddPatientForm({ clinicaId, onClose, onSuccess, initialData }: A
     medicamentos_actuales: initialData?.medicamentos_actuales || '',
     enfermedades_cronicas: initialData?.enfermedades_cronicas || '',
     historial_medico: initialData?.historial_medico || '',
+    diabetico: initialData?.diabetico || false,
     // Vitales
     presion_arterial: initialData?.vitales?.presion_arterial || '',
     frecuencia_cardiaca: initialData?.vitales?.frecuencia_cardiaca || '',
@@ -746,6 +749,19 @@ export function AddPatientForm({ clinicaId, onClose, onSuccess, initialData }: A
                     <Field label={labels.fields.alergias} value={form.alergias} onChange={set('alergias')} disabled={loading || success} placeholder="Penicilina, látex, AINE..." textarea rows={2} />
                     <Field label={labels.fields.medicamentos_actuales} value={form.medicamentos_actuales} onChange={set('medicamentos_actuales')} disabled={loading || success} placeholder="Metformina 500mg, Losartán 50mg..." textarea rows={2} />
                     <Field label={labels.fields.enfermedades_cronicas} value={form.enfermedades_cronicas} onChange={set('enfermedades_cronicas')} disabled={loading || success} placeholder="Diabetes Tipo 2, Hipertensión..." textarea rows={2} />
+                    <div className="flex items-center gap-3 bg-rose-500/5 dark:bg-rose-950/20 border-2 border-slate-200 dark:border-zinc-800 p-4 transition-all duration-200 focus-within:border-rose-500">
+                      <input
+                        type="checkbox"
+                        id="diabetico-checkbox"
+                        checked={form.diabetico}
+                        onChange={e => setForm(f => ({ ...f, diabetico: e.target.checked }))}
+                        disabled={loading || success}
+                        className="w-4 h-4 accent-rose-600 dark:accent-rose-500 cursor-pointer disabled:opacity-40"
+                      />
+                      <label htmlFor="diabetico-checkbox" className="select-none text-[9px] font-black uppercase tracking-[0.2em] text-slate-700 dark:text-zinc-350 cursor-pointer flex-1">
+                        {lang === 'es' ? 'PACIENTE DIABÉTICO (ALTO RIESGO CLÍNICO)' : 'DIABETIC PATIENT (HIGH CLINICAL RISK)'}
+                      </label>
+                    </div>
                     <Field label={labels.fields.historial_medico} value={form.historial_medico} onChange={set('historial_medico')} disabled={loading || success} placeholder="Observaciones clínicas relevantes..." textarea rows={3} />
                   </FormSection>
 
