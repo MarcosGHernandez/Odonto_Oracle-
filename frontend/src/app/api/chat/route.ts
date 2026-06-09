@@ -1178,25 +1178,30 @@ export async function POST(req: Request) {
       try {
         stepResult = await generateText({
           model: google(activeModel),
-          maxRetries: 0,
+          maxRetries: 2, // Habilitamos 2 reintentos automáticos nativos ante micro-picos del servidor de Google
           system: systemPrompt,
           messages: currentMessages,
           tools: toolsDefinition
         });
       } catch (err: any) {
-        const isQuotaError =
+        const shouldFallback =
           err?.message?.includes('quota') ||
           err?.message?.includes('Quota') ||
           err?.message?.includes('limit') ||
           err?.message?.includes('429') ||
-          err?.message?.includes('ResourceExhausted');
+          err?.message?.includes('ResourceExhausted') ||
+          err?.message?.includes('demand') ||
+          err?.message?.includes('Demand') ||
+          err?.message?.includes('overloaded') ||
+          err?.message?.includes('503') ||
+          err?.message?.includes('500');
 
-        if (isQuotaError && activeModel === 'gemini-3.5-flash') {
-          console.warn(`[WARN] Model ${activeModel} hit quota/limit. Falling back to gemini-3.1-pro.`);
+        if (shouldFallback && activeModel === 'gemini-3.5-flash') {
+          console.warn(`[WARN] Model ${activeModel} failed (quota/demand/error). Falling back to gemini-3.1-pro.`);
           activeModel = 'gemini-3.1-pro';
           stepResult = await generateText({
             model: google(activeModel),
-            maxRetries: 0,
+            maxRetries: 2,
             system: systemPrompt,
             messages: currentMessages,
             tools: toolsDefinition
