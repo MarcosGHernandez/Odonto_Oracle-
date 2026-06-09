@@ -311,7 +311,7 @@ async def obtener_agenda(clinica_id: str):
                     p_id = src.get("paciente_id")
                     p_name = src.get("nombre")
                     if p_id and p_name:
-                        pacientes_map[p_id] = p_name
+                        pacientes_map[p_id.strip().lower()] = p_name
             except Exception as es_p_err:
                 print(f"[Agenda ES] Error al mapear nombres de pacientes desde ES: {es_p_err}")
 
@@ -321,14 +321,18 @@ async def obtener_agenda(clinica_id: str):
                 from database_fallback import get_fallback_patients
                 pacientes_lista = get_fallback_patients(clinica_id)
                 for p in pacientes_lista:
-                    pacientes_map[p.get("paciente_id")] = p.get("nombre")
+                    p_id = p.get("paciente_id")
+                    p_name = p.get("nombre")
+                    if p_id and p_name:
+                        pacientes_map[p_id.strip().lower()] = p_name
             except Exception as p_err:
                 print(f"[Agenda Fallback] Advertencia al mapear nombres de pacientes: {p_err}")
 
         # Inyectar nombre de paciente
         for c in consultas:
             p_id = c.get("paciente_id")
-            c["nombre_paciente"] = pacientes_map.get(p_id, p_id)
+            p_id_norm = p_id.strip().lower() if p_id else ""
+            c["nombre_paciente"] = pacientes_map.get(p_id_norm, p_id)
 
         print(f"[API] Agenda cargada con {len(consultas)} citas para la clinica {clinica_id} ({loaded_from})")
         return {
