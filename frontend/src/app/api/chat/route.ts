@@ -1169,7 +1169,7 @@ export async function POST(req: Request) {
     let currentStep = 0;
     const maxSteps = 5;
     let continueLoop = true;
-    let activeModel = 'gemini-3.5-flash';
+    let activeModel = 'gemini-1.5-flash';
 
     while (continueLoop && currentStep < maxSteps) {
       console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep} using model: ${activeModel}`);
@@ -1191,9 +1191,9 @@ export async function POST(req: Request) {
           err?.message?.includes('429') ||
           err?.message?.includes('ResourceExhausted');
 
-        if (isQuotaError && activeModel === 'gemini-3.5-flash') {
-          console.warn(`[WARN] Model ${activeModel} hit quota/limit. Falling back to gemini-3-pro.`);
-          activeModel = 'gemini-3-pro';
+        if (isQuotaError && activeModel === 'gemini-1.5-flash') {
+          console.warn(`[WARN] Model ${activeModel} hit quota/limit. Falling back to gemini-1.5-pro.`);
+          activeModel = 'gemini-1.5-pro';
           stepResult = await generateText({
             model: google(activeModel),
             maxRetries: 0,
