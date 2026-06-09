@@ -7,8 +7,8 @@ import path from 'path';
 
 const tool = (options: any) => options;
 
-// Permite respuestas en streaming de hasta 30 segundos
-export const maxDuration = 30;
+// Permite respuestas en streaming de hasta 60 segundos
+export const maxDuration = 60;
 
 const getBackendUrl = () => {
   const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -554,7 +554,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre, clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -594,7 +594,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ material_dental, region }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -662,7 +662,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tipo_documento, datos_paciente: datos_enriquecidos, contenido_medico, idioma }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -710,7 +710,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ paciente_id, mensaje_texto, clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -757,7 +757,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ paciente_id, mensaje_texto, canal: 'email', clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -818,7 +818,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...payload, clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -881,7 +881,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...payload, clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -934,7 +934,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...payload, clinica_id: clinicaId }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -974,7 +974,7 @@ export async function POST(req: Request) {
               const res = await fetchWithTimeout(`${BACKEND}/clinica/agenda/${clinicaId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -1007,7 +1007,7 @@ export async function POST(req: Request) {
               const res = await fetchWithTimeout(`${BACKEND}/pacientes/${clinicaId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -1040,7 +1040,7 @@ export async function POST(req: Request) {
               const res = await fetchWithTimeout(`${BACKEND}/clinica/metricas?clinica_id=${clinicaId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -1078,7 +1078,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ clinica_id: clinicaId, appointment_id }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -1135,7 +1135,7 @@ export async function POST(req: Request) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ clinica_id: clinicaId, ...payload }),
-                timeout: 8000,
+                timeout: 4000,
               });
               if (!res.ok) {
                 return {
@@ -1167,7 +1167,7 @@ export async function POST(req: Request) {
     const allSteps: any[] = [];
     let finalResponseText = '';
     let currentStep = 0;
-    const maxSteps = 5;
+    const maxSteps = 4;
     let continueLoop = true;
     let activeModel = 'gemini-3.5-flash';
 
