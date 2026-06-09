@@ -1197,8 +1197,8 @@ export async function POST(req: Request) {
           err?.message?.includes('500');
 
         if (shouldFallback && activeModel === 'gemini-3.5-flash') {
-          console.warn(`[WARN] Model ${activeModel} failed (quota/demand/error). Falling back to gemini-3.1-pro.`);
-          activeModel = 'gemini-3.1-pro';
+          console.warn(`[WARN] Model ${activeModel} failed (quota/demand/error). Falling back to gemini-3.1-pro-preview.`);
+          activeModel = 'gemini-3.1-pro-preview';
           stepResult = await generateText({
             model: google(activeModel),
             maxRetries: 2,
