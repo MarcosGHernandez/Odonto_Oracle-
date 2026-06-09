@@ -1197,8 +1197,30 @@ export async function POST(req: Request) {
           err?.message?.includes('500');
 
         if (shouldFallback && activeModel === 'gemini-3.5-flash') {
-          console.warn(`[WARN] Model ${activeModel} failed (quota/demand/error). Falling back to gemini-3.1-pro-preview.`);
+          console.warn(`[WARN] Model gemini-3.5-flash failed. Falling back to gemini-3.1-pro-preview.`);
           activeModel = 'gemini-3.1-pro-preview';
+          try {
+            stepResult = await generateText({
+              model: google(activeModel),
+              maxRetries: 2,
+              system: systemPrompt,
+              messages: currentMessages,
+              tools: toolsDefinition
+            });
+          } catch (err2: any) {
+            console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
+            activeModel = 'gemini-3-flash-preview';
+            stepResult = await generateText({
+              model: google(activeModel),
+              maxRetries: 2,
+              system: systemPrompt,
+              messages: currentMessages,
+              tools: toolsDefinition
+            });
+          }
+        } else if (shouldFallback && activeModel === 'gemini-3.1-pro-preview') {
+          console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
+          activeModel = 'gemini-3-flash-preview';
           stepResult = await generateText({
             model: google(activeModel),
             maxRetries: 2,
