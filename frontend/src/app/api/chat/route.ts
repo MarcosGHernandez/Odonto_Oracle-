@@ -220,7 +220,7 @@ CRITICAL SECURITY PROTOCOLS AND GUARDRAILS:
 
 Workflow Rules and Business Logic:
 6. BEFORE generating prescriptions or estimates for a patient, you MUST search for them in the database using 'buscar_paciente' to validate that they exist and obtain their actual data (clinical ID, phone, allergies). NEVER make up patient data.
-7. If you are asked to quote a dental material, use 'buscar_precio_material' specifying the material and the region (MX or US).
+7. If you are asked to quote a dental material, use 'buscar_precio_material' specifying the material and the region (MX or US). If the doctor does not specify the region, default to 'MX' and politely inform them in your response that they can specify 'US' if needed. If they request an estimate/budget but omit the patient's name, you cannot generate the final document; politely ask the doctor for the patient's name.
 8. Once you have the patient data and the material quote, proceed to create the formal PDF estimate using 'generar_documento_clinico'.
 9. If requested by the doctor, send the generated estimate or a notification to the patient immediately using 'enviar_notificacion_whatsapp' (for WhatsApp) or 'enviar_notificacion_email' (for Email) with their clinical ID or destination email. Since the system operates in a Hackathon demo environment, explicitly inform the doctor that the message has been processed in "Sandbox / Simulation Mode" for verification. If sent via email, you MUST present the Markdown link [View Sent Email](SIMULATION_URL) in your final response for the doctor to visualize the premium HTML email preview.
 
@@ -269,7 +269,7 @@ REGLAS CRÍTICAS DE SEGURIDAD Y GUARDRAILS (SECURITY PROTOCOLS):
 
 Reglas de Encadenamiento y Lógica de Negocio:
 6. ANTES de generar recetas o presupuestos para un paciente, DEBES buscarlo en la base de datos usando 'buscar_paciente' para validar que existe y obtener sus datos reales (ID clínico, teléfono, alergias). NUNCA inventes datos de un paciente.
-7. Si te piden cotizar un material dental, usa 'buscar_precio_material' especificando el material y la región (MX o US).
+7. Si te piden cotizar un material dental, usa 'buscar_precio_material' especificando el material y la región (MX o US). Si el doctor no especifica la región, usa 'MX' por defecto e infórmale amigablemente en tu respuesta que puede indicar 'US' si lo requiere. Si solicitan un presupuesto pero omiten el nombre del paciente, no podrás generar el documento final; pídele amigablemente al doctor el nombre del paciente para poder proceder.
 8. Una vez tengas los datos del paciente y la cotización del material, procede a crear el presupuesto PDF formal usando 'generar_documento_clinico'.
 9. Si el doctor lo solicitó, envía de inmediato el presupuesto generado o una notificación al paciente usando 'enviar_notificacion_whatsapp' (para WhatsApp) o 'enviar_notificacion_email' (para Correo Electrónico) con su ID clínico o email de destino. Dado que el sistema opera en un entorno de demostración de Hackathon, infórmale de manera amigable al doctor que la notificación se procesó bajo el "Modo Sandbox / Simulación de Pruebas" para verificación. Si se envía por correo, DEBES presentar obligatoriamente en tu respuesta final el enlace Markdown [Ver Correo Enviado](URL_DE_SIMULACION) para que el doctor visualice la previsualización del correo HTML premium.
 
@@ -622,13 +622,13 @@ export async function POST(req: Request) {
           description: 'Busca en internet el precio de un material dental en sitios proveedores por región (MX o US).',
           parameters: zodSchema(z.object({
             material_dental: z.string().describe('Nombre del material dental a cotizar.'),
-            region: z.string().describe('Región de búsqueda: "MX" o "US".'),
+            region: z.string().optional().default('MX').describe('Región de búsqueda: "MX" o "US". Por defecto es "MX" si no se especifica.'),
           })),
           inputSchema: zodSchema(z.object({
             material_dental: z.string().describe('Nombre del material dental a cotizar.'),
-            region: z.string().describe('Región de búsqueda: "MX" o "US".'),
+            region: z.string().optional().default('MX').describe('Región de búsqueda: "MX" o "US". Por defecto es "MX" si no se especifica.'),
           })),
-          execute: async ({ material_dental, region }: { material_dental: string; region: string }) => {
+          execute: async ({ material_dental, region = 'MX' }: { material_dental: string; region?: string }) => {
             try {
               const res = await fetchWithTimeout(`${BACKEND}/tools/scraper`, {
                 method: 'POST',
