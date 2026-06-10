@@ -15,10 +15,9 @@ const t = {
     today: 'HOY',
     quickTitle: 'ACCIONES RÁPIDAS',
     quick: [
-      { label: 'NUEVA RECETA',       color: 'bg-rose-50 text-rose-600',     dark: 'dark:bg-rose-950/20 dark:text-rose-400' },
-      { label: 'BUSCAR MATERIAL',    color: 'bg-blue-50 text-blue-600',     dark: 'dark:bg-blue-950/20 dark:text-blue-400' },
-      { label: 'NOTIFICAR PACIENTE', color: 'bg-emerald-50 text-emerald-600', dark: 'dark:bg-emerald-950/20 dark:text-emerald-400' },
-      { label: 'VER HISTORIAL',      color: 'bg-amber-50 text-amber-600',   dark: 'dark:bg-amber-950/20 dark:text-amber-400' },
+      { label: 'NUEVA RECETA',    color: 'bg-rose-50 text-rose-600',     dark: 'dark:bg-rose-950/20 dark:text-rose-400' },
+      { label: 'BUSCAR MATERIAL', color: 'bg-blue-50 text-blue-600',     dark: 'dark:bg-blue-950/20 dark:text-blue-400' },
+      { label: 'VER HISTORIAL',   color: 'bg-amber-50 text-amber-600',   dark: 'dark:bg-amber-950/20 dark:text-amber-400' },
     ],
     upcomingTitle: 'PRÓXIMAS CITAS',
     noAppointments: 'Sin citas próximas.',
@@ -34,7 +33,6 @@ const t = {
     quick: [
       { label: 'NEW PRESCRIPTION', color: 'bg-rose-50 text-rose-600',     dark: 'dark:bg-rose-950/20 dark:text-rose-400' },
       { label: 'SEARCH MATERIAL',  color: 'bg-blue-50 text-blue-600',     dark: 'dark:bg-blue-950/20 dark:text-blue-400' },
-      { label: 'NOTIFY PATIENT',   color: 'bg-emerald-50 text-emerald-600', dark: 'dark:bg-emerald-950/20 dark:text-emerald-400' },
       { label: 'VIEW HISTORY',     color: 'bg-amber-50 text-amber-600',   dark: 'dark:bg-amber-950/20 dark:text-amber-400' },
     ],
     upcomingTitle: 'UPCOMING APPOINTMENTS',

@@ -244,8 +244,6 @@ export default function ChatInterface() {
           prompt = '[Acción Rápida]: El doctor ha solicitado emitir una NUEVA RECETA. Como asistente de Odonto-Oracle, inicia un diálogo profesional clínico. Pregunta al doctor amigablemente para qué paciente es la receta (puedes sugerir a pacientes conocidos como Carlos Slim), qué medicamentos/dosis requiere, cuál es el diagnóstico o motivo, y recuérdale que validarás alergias críticas en el expediente.';
         } else if (action === 'BUSCAR MATERIAL') {
           prompt = '[Acción Rápida]: El doctor ha solicitado BUSCAR MATERIAL o cotizar insumos dentales. Como asistente de Odonto-Oracle, saluda profesionalmente y consulta qué material o equipo odontológico específico desea cotizar (ej. resina Z350 de 3M) y bajo qué región geográfica (México - MX o Estados Unidos - US) para escanear el mercado.';
-        } else if (action === 'NOTIFICAR PACIENTE') {
-          prompt = '[Acción Rápida]: El doctor ha solicitado NOTIFICAR PACIENTE. Pregunta cordialmente qué mensaje desea enviar al paciente, cuál es el destinatario o número de teléfono, y qué canal prefiere emplear (WhatsApp o SMS) para programar la entrega.';
         } else if (action === 'VER HISTORIAL') {
           prompt = '[Acción Rápida]: El doctor ha solicitado VER HISTORIAL clínico de un expediente. Pídele de manera atenta el nombre completo o ID clínico del paciente a buscar para extraer sus antecedentes médicos, medicamentos actuales, enfermedades crónicas y signos vitales.';
         }
@@ -254,8 +252,6 @@ export default function ChatInterface() {
           prompt = '[Quick Action]: The doctor requested a NEW PRESCRIPTION. As the Odonto-Oracle assistant, initiate a professional clinical dialogue. Ask the doctor which patient it is for (you can suggest known patients like Carlos Slim), what medication/dosage is needed, the diagnosis or reason, and let them know you will validate any critical allergies.';
         } else if (action === 'SEARCH MATERIAL' || action === 'BUSCAR MATERIAL') {
           prompt = '[Quick Action]: The doctor requested to SEARCH MATERIAL or quote dental supplies. As Odonto-Oracle, greet them professionally and ask which specific dental material or equipment they would like to quote (e.g. 3M Z350 resin) and in which geographical region (Mexico - MX or United States - US).';
-        } else if (action === 'NOTIFY PATIENT' || action === 'NOTIFICAR PACIENTE') {
-          prompt = '[Quick Action]: The doctor requested to NOTIFY PATIENT. Kindly ask what message they want to send, to which patient or phone number, and which communication channel they prefer to use (WhatsApp or SMS).';
         } else if (action === 'VIEW HISTORY' || action === 'VER HISTORIAL') {
           prompt = '[Quick Action]: The doctor requested to VIEW HISTORY of a clinical record. Kindly ask for the patient\'s full name or clinical ID to retrieve their background, current medications, chronic illnesses, and vitals.';
         }

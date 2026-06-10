@@ -671,24 +671,24 @@ export async function POST(req: Request) {
             tipo_documento: z.string().describe('Tipo de documento: "receta", "presupuesto" o "tratamiento".'),
             datos_paciente: z.record(z.string(), z.any()).describe('Datos del paciente obtenidos de buscar_paciente.'),
             contenido_medico: z.string().describe('Diagnóstico, tratamiento, medicamentos o partidas del presupuesto.'),
-            idioma: z.string().describe('Idioma del documento: "es" o "en".'),
+            idioma: z.string().optional().default('es').describe('Idioma del documento: "es" o "en". Por defecto "es".'),
           })),
           inputSchema: zodSchema(z.object({
             tipo_documento: z.string().describe('Tipo de documento: "receta", "presupuesto" o "tratamiento".'),
             datos_paciente: z.record(z.string(), z.any()).describe('Datos del paciente obtenidos de buscar_paciente.'),
             contenido_medico: z.string().describe('Diagnóstico, tratamiento, medicamentos o partidas del presupuesto.'),
-            idioma: z.string().describe('Idioma del documento: "es" o "en".'),
+            idioma: z.string().optional().default('es').describe('Idioma del documento: "es" o "en". Por defecto "es".'),
           })),
           execute: async ({
             tipo_documento,
             datos_paciente,
             contenido_medico,
-            idioma,
+            idioma = 'es',
           }: {
             tipo_documento: string;
             datos_paciente: Record<string, any>;
             contenido_medico: string;
-            idioma: string;
+            idioma?: string;
           }) => {
             try {
               // Inyectar clinica_id, nombre_doctor y nombre_clinica en los datos del paciente para el PDF
