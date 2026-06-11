@@ -7,8 +7,8 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 const tool = (options: any) => options;
 
 // Permite respuestas en streaming de hasta 60 segundos
-// Permite respuestas en streaming de hasta 90 segundos
-export const maxDuration = 90;
+// Permite respuestas en streaming de hasta 120 segundos
+export const maxDuration = 120;
 
 const getBackendUrl = () => {
   const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -439,7 +439,7 @@ export async function POST(req: Request) {
   const startTime = Date.now();
   const TIMEOUT_LIMIT = process.env.FUNCTION_TIMEOUT_LIMIT
     ? parseInt(process.env.FUNCTION_TIMEOUT_LIMIT, 10)
-    : 85000; // 85 seconds default to prevent Vercel 90s timeout, can be set higher on Pro plans
+    : 115000; // 115 seconds default to prevent Vercel 120s timeout, can be set higher on Pro plans
   let lang = 'es';
   try {
     const { messages, lang: reqLang } = await req.json();
@@ -1307,7 +1307,7 @@ export async function POST(req: Request) {
       try {
         stepResult = await generateText({
           model: google(activeModel),
-          maxRetries: 2, // Habilitamos 2 reintentos automáticos nativos ante micro-picos del servidor de Google
+          maxRetries: 1, // Reducido a 1 reintento para agilizar fallbacks en situaciones de cuota ajustada
           system: systemPrompt,
           messages: currentMessages,
           tools: toolsDefinition,
@@ -1335,12 +1335,12 @@ export async function POST(req: Request) {
           err?.message?.includes('500');
 
         if (shouldFallback && activeModel === 'gemini-3.5-flash') {
-          console.warn(`[WARN] Model gemini-3.5-flash failed. Falling back to gemini-3.1-pro-preview.`);
-          activeModel = 'gemini-3.1-pro-preview';
+          console.warn(`[WARN] Model gemini-3.5-flash failed. Falling back to gemini-3-flash-preview.`);
+          activeModel = 'gemini-3-flash-preview';
           try {
             stepResult = await generateText({
               model: google(activeModel),
-              maxRetries: 2,
+              maxRetries: 1,
               system: systemPrompt,
               messages: currentMessages,
               tools: toolsDefinition,
@@ -1352,12 +1352,12 @@ export async function POST(req: Request) {
               console.warn(`[PERF LOG] Step ${currentStep} generation fallback aborted due to timeout.`);
               break;
             }
-            console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
-            activeModel = 'gemini-3-flash-preview';
+            console.warn(`[WARN] Model gemini-3-flash-preview failed. Falling back to gemini-3.1-pro-preview as last resort.`);
+            activeModel = 'gemini-3.1-pro-preview';
             try {
               stepResult = await generateText({
                 model: google(activeModel),
-                maxRetries: 2,
+                maxRetries: 1,
                 system: systemPrompt,
                 messages: currentMessages,
                 tools: toolsDefinition,
@@ -1372,13 +1372,13 @@ export async function POST(req: Request) {
               throw err3;
             }
           }
-        } else if (shouldFallback && activeModel === 'gemini-3.1-pro-preview') {
-          console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
-          activeModel = 'gemini-3-flash-preview';
+        } else if (shouldFallback && activeModel === 'gemini-3-flash-preview') {
+          console.warn(`[WARN] Model gemini-3-flash-preview failed. Falling back to gemini-3.1-pro-preview.`);
+          activeModel = 'gemini-3.1-pro-preview';
           try {
             stepResult = await generateText({
               model: google(activeModel),
-              maxRetries: 2,
+              maxRetries: 1,
               system: systemPrompt,
               messages: currentMessages,
               tools: toolsDefinition,
