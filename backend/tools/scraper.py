@@ -103,6 +103,16 @@ def _guardar_en_historial(
 # Función principal consumida por el endpoint FastAPI y por Gemini
 # ---------------------------------------------------------------------------
 
+def normalizar_region(region_raw: str) -> str:
+    if not region_raw:
+        return "MX"
+    clean = region_raw.lower().strip()
+    if clean in ["mx", "mex", "méxico", "mexico", "república mexicana", "republica mexicana", "nacional"]:
+        return "MX"
+    if clean in ["us", "usa", "united states", "estados unidos", "norteamérica", "norteamerica", "america", "eeuu", "ee.uu."]:
+        return "US"
+    return "MX"
+
 def dental_market_scraper(material_dental: str, region: str) -> str:
     """
     Busca precios de materiales dentales en depósitos regionales.
@@ -121,11 +131,9 @@ def dental_market_scraper(material_dental: str, region: str) -> str:
                 "System Error: No se especificó el material dental. "
                 "Por favor indica qué material dental deseas cotizar."
             )
-        if region not in ["MX", "US"]:
-            return (
-                f"System Error: La región '{region}' no es válida. "
-                "Usa 'MX' para México o 'US' para Estados Unidos."
-            )
+        
+        region_clean = normalizar_region(region)
+        region = region_clean
 
         # Simular latencia de red real
         time.sleep(1)

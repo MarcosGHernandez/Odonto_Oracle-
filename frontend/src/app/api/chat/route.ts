@@ -436,6 +436,8 @@ function cleanCoreMessages(messages: any[]): any[] {
 
 
 export async function POST(req: Request) {
+  const startTime = Date.now();
+  const TIMEOUT_LIMIT = 50000; // 50s (safe buffer for Vercel 60s)
   let lang = 'es';
   try {
     const { messages, lang: reqLang } = await req.json();
@@ -686,7 +688,17 @@ export async function POST(req: Request) {
             region: z.string().optional().describe('Región de búsqueda: "MX" o "US". Si se omite, se determinará según el idioma activo (US para inglés, MX para español).'),
           })),
           execute: async ({ material_dental, region }: { material_dental: string; region?: string }) => {
-            const activeRegion = region || (lang === 'en' ? 'US' : 'MX');
+            const toolStart = Date.now();
+            const normalizeRegion = (r?: string) => {
+              if (!r) return '';
+              const clean = r.toLowerCase().trim();
+              if (['mx', 'mex', 'méxico', 'mexico', 'república mexicana', 'republica mexicana', 'nacional'].includes(clean)) return 'MX';
+              if (['us', 'usa', 'united states', 'estados unidos', 'norteamérica', 'norteamerica', 'america', 'eeuu', 'ee.uu.'].includes(clean)) return 'US';
+              return r;
+            };
+            const mappedRegion = normalizeRegion(region);
+            const activeRegion = mappedRegion || (lang === 'en' ? 'US' : 'MX');
+            console.log(`[PERF LOG] Starting tool 'buscar_precio_material' for '${material_dental}' in region: '${activeRegion}' (raw: '${region}')`);
             try {
               const res = await fetchWithTimeout(`${BACKEND}/tools/scraper`, {
                 method: 'POST',
@@ -694,11 +706,13 @@ export async function POST(req: Request) {
                 body: JSON.stringify({ material_dental, region: activeRegion }),
                 timeout: 4000,
               });
+              const duration = Date.now() - toolStart;
+              console.log(`[PERF LOG] Tool 'buscar_precio_material' completed in ${duration}ms with status: ${res.status}`);
               if (!res.ok) {
                 return {
                   status: 'error',
                   message: `HTTP ${res.status}`,
-                  agent_instruction: `CONFIRMACION OBLIGATORIA: La cotización en línea de '${material_dental}' para la región ${region} devolvió el código HTTP ${res.status}. Informa al doctor que no pudimos acceder a los precios en línea y sugiérele registrar un precio personalizado o manual para el presupuesto.`
+                  agent_instruction: `CONFIRMACION OBLIGATORIA: La cotización en línea de '${material_dental}' para la región ${activeRegion} devolvió el código HTTP ${res.status}. Informa al doctor que no pudimos acceder a los precios en línea y sugiérele registrar un precio personalizado o manual para el presupuesto.`
                 };
               }
               const data = await res.json();
@@ -711,10 +725,12 @@ export async function POST(req: Request) {
               }
               return validated;
             } catch (err: any) {
+              const duration = Date.now() - toolStart;
+              console.error(`[PERF LOG] Tool 'buscar_precio_material' failed after ${duration}ms. Error: ${err.message}`);
               return {
                 status: 'error',
                 message: err.message,
-                agent_instruction: `CONFIRMACION OBLIGATORIA: El rastreador dental en línea de '${material_dental}' en ${region} no está disponible (${err.message}). Informa al doctor que el scraper de proveedores está offline y sugiérele ingresar un precio estimado manualmente.`
+                agent_instruction: `CONFIRMACION OBLIGATORIA: El rastreador dental en línea de '${material_dental}' en ${activeRegion} no está disponible (${err.message}). Informa al doctor que el scraper de proveedores está offline y sugiérele ingresar un precio estimado manualmente.`
               };
             }
           },
@@ -1270,8 +1286,20 @@ export async function POST(req: Request) {
     let activeModel = 'gemini-3.5-flash';
 
     while (continueLoop && currentStep < maxSteps) {
+      // Server-side timeout guard to prevent raw Vercel crash and respond with a friendly message
+      if (Date.now() - startTime > TIMEOUT_LIMIT) {
+        console.error(`[PERF LOG] Timeout Guard triggered. Total execution time: ${Date.now() - startTime}ms. Aborting ReAct loop.`);
+        return new Response(
+          lang === 'en'
+            ? 'Clinical System Timeout: The request took too long to process. The clinical AI model or database queries took longer than usual. Please retry your request.'
+            : 'Error de Tiempo de Espera: La solicitud tardó demasiado en procesarse. El modelo de IA clínica o las consultas de base de datos demoraron más de lo habitual. Por favor, reintente su consulta.',
+          { status: 504 }
+        );
+      }
+
       console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep} using model: ${activeModel}`);
       
+      const modelStart = Date.now();
       let stepResult;
       try {
         stepResult = await generateText({
@@ -1281,6 +1309,8 @@ export async function POST(req: Request) {
           messages: currentMessages,
           tools: toolsDefinition
         });
+        const modelDuration = Date.now() - modelStart;
+        console.log(`[PERF LOG] Step ${currentStep} Model generation (${activeModel}) took ${modelDuration}ms`);
       } catch (err: any) {
         const shouldFallback =
           err?.message?.includes('quota') ||
