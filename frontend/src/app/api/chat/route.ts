@@ -7,8 +7,8 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 const tool = (options: any) => options;
 
 // Permite respuestas en streaming de hasta 60 segundos
-// Permite respuestas en streaming de hasta 70 segundos
-export const maxDuration = 70;
+// Permite respuestas en streaming de hasta 90 segundos
+export const maxDuration = 90;
 
 const getBackendUrl = () => {
   const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -439,7 +439,7 @@ export async function POST(req: Request) {
   const startTime = Date.now();
   const TIMEOUT_LIMIT = process.env.FUNCTION_TIMEOUT_LIMIT
     ? parseInt(process.env.FUNCTION_TIMEOUT_LIMIT, 10)
-    : 65054; // 65 seconds default to prevent Vercel 70s timeout, can be set higher on Pro plans
+    : 85000; // 85 seconds default to prevent Vercel 90s timeout, can be set higher on Pro plans
   let lang = 'es';
   try {
     const { messages, lang: reqLang } = await req.json();
