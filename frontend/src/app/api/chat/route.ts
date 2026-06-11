@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { generateText, streamText, convertToModelMessages, zodSchema } from 'ai';
 import { z } from 'zod';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -462,6 +462,13 @@ export async function POST(req: Request) {
 
     // Clerk Dynamic extraction
     const { orgId, userId } = await auth();
+    let user = null;
+    try {
+      user = await currentUser();
+    } catch (e: any) {
+      console.warn(`[Clerk] Failed to fetch current user context: ${e.message}`);
+    }
+
     const headerClinicaId = req.headers.get('x-clinica-id');
     console.log('[DEBUG] headerClinicaId:', headerClinicaId);
     console.log('[DEBUG] orgId:', orgId);
@@ -470,19 +477,47 @@ export async function POST(req: Request) {
     const clinicaId = headerClinicaId || orgId || userId || 'OO-CLINIC-001';
     console.log(`[Clerk Decoupling] Operando bajo clinicaId: ${clinicaId}`);
 
-    // Leer físicamente el archivo de configuración clínica settings_{clinicaId}.json
-    let nombreDoctor = 'Dentista Responsable';
-    let nombreClinica = 'Odonto-Oracle';
-
-    try {
-      const settingsPath = path.join(process.cwd(), '..', 'backend', 'static', `settings_${clinicaId}.json`);
-      const fileContent = await fs.readFile(settingsPath, 'utf-8');
-      const settings = JSON.parse(fileContent);
-      if (settings.nombre_doctor) {
-        nombreDoctor = settings.nombre_doctor.trim();
+    // Determine default doctor name and clinic name using the Clerk user details
+    let defaultDoctorName = 'Dentista Responsable';
+    if (user) {
+      if (user.firstName || user.lastName) {
+        defaultDoctorName = `Dr. ${[user.firstName, user.lastName].filter(Boolean).join(' ')}`;
+      } else if (user.emailAddresses && user.emailAddresses.length > 0) {
+        const email = user.emailAddresses[0].emailAddress;
+        const namePart = email.split('@')[0];
+        defaultDoctorName = `Dr. ${namePart.split(/[^a-zA-Z]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).filter(Boolean).join(' ')}`;
       }
-      if (settings.nombre_clinica) {
-        nombreClinica = settings.nombre_clinica.trim();
+    }
+
+    let defaultClinicName = 'Odonto-Oracle';
+    if (user) {
+      if (user.lastName || user.firstName) {
+        const surName = user.lastName || user.firstName || '';
+        defaultClinicName = `Clínica Cleandex ${surName}`;
+      } else if (user.emailAddresses && user.emailAddresses.length > 0) {
+        const email = user.emailAddresses[0].emailAddress;
+        const namePart = email.split('@')[0];
+        const capName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        defaultClinicName = `Clínica Cleandex ${capName}`;
+      }
+    }
+
+    // Leer físicamente el archivo de configuración clínica settings_{clinicaId}.json
+    let nombreDoctor = defaultDoctorName;
+    let nombreClinica = defaultClinicName;
+    const settingsPath = path.join(process.cwd(), '..', 'backend', 'static', `settings_${clinicaId}.json`);
+
+    let settingsExists = false;
+    let existingSettings: any = {};
+    try {
+      const fileContent = await fs.readFile(settingsPath, 'utf-8');
+      existingSettings = JSON.parse(fileContent);
+      settingsExists = true;
+      if (existingSettings.nombre_doctor && existingSettings.nombre_doctor.trim()) {
+        nombreDoctor = existingSettings.nombre_doctor.trim();
+      }
+      if (existingSettings.nombre_clinica && existingSettings.nombre_clinica.trim()) {
+        nombreClinica = existingSettings.nombre_clinica.trim();
       }
       console.log(`[Settings Dynamic Load] Loaded settings_${clinicaId}.json: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
     } catch (e: any) {
@@ -499,6 +534,28 @@ export async function POST(req: Request) {
         }
       } catch (e2) {
         console.warn(`[Settings Dynamic Load] Failed to load default settings.json. Using hardcoded defaults.`);
+      }
+    }
+
+    // Si no existe el archivo, o existe pero no tiene nombre de doctor/clínica configurados, lo guardamos/actualizamos
+    if (!settingsExists || !existingSettings.nombre_doctor || !existingSettings.nombre_clinica) {
+      try {
+        const newSettings = {
+          clinica_id: clinicaId,
+          twilio_whatsapp_number: existingSettings.twilio_whatsapp_number || "whatsapp:+14155238886",
+          twilio_sms_number: existingSettings.twilio_sms_number || "+14155238886",
+          nombre_clinica: nombreClinica,
+          nombre_doctor: nombreDoctor,
+          especialidad: existingSettings.especialidad || "Odontología General",
+          region_scraper: existingSettings.region_scraper || "MX",
+          canal_notificacion: existingSettings.canal_notificacion || "email",
+          telefono_contacto: existingSettings.telefono_contacto || "+529511234567"
+        };
+        await fs.mkdir(path.dirname(settingsPath), { recursive: true });
+        await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2), 'utf-8');
+        console.log(`[Settings Dynamic Load] Personalizado e inicializado settings_${clinicaId}.json: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
+      } catch (err: any) {
+        console.error(`[Settings Dynamic Load] Error al escribir settings_${clinicaId}.json:`, err.message);
       }
     }
 
