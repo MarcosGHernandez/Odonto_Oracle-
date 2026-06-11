@@ -2,13 +2,13 @@ import { google } from '@ai-sdk/google';
 import { generateText, streamText, convertToModelMessages, zodSchema } from 'ai';
 import { z } from 'zod';
 import { auth, currentUser } from '@clerk/nextjs/server';
-import fs from 'fs/promises';
-import path from 'path';
+
 
 const tool = (options: any) => options;
 
 // Permite respuestas en streaming de hasta 60 segundos
-export const maxDuration = 60;
+// Permite respuestas en streaming de hasta 70 segundos
+export const maxDuration = 70;
 
 const getBackendUrl = () => {
   const url = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -437,7 +437,9 @@ function cleanCoreMessages(messages: any[]): any[] {
 
 export async function POST(req: Request) {
   const startTime = Date.now();
-  const TIMEOUT_LIMIT = 50000; // 50s (safe buffer for Vercel 60s)
+  const TIMEOUT_LIMIT = process.env.FUNCTION_TIMEOUT_LIMIT
+    ? parseInt(process.env.FUNCTION_TIMEOUT_LIMIT, 10)
+    : 65054; // 65 seconds default to prevent Vercel 70s timeout, can be set higher on Pro plans
   let lang = 'es';
   try {
     const { messages, lang: reqLang } = await req.json();
@@ -504,60 +506,63 @@ export async function POST(req: Request) {
       }
     }
 
-    // Leer físicamente el archivo de configuración clínica settings_{clinicaId}.json
+    // Leer configuración clínica desde el API del backend en lugar de acceso directo a archivos
     let nombreDoctor = defaultDoctorName;
     let nombreClinica = defaultClinicName;
-    const settingsPath = path.join(process.cwd(), '..', 'backend', 'static', `settings_${clinicaId}.json`);
+    let settingsData: any = null;
 
-    let settingsExists = false;
-    let existingSettings: any = {};
     try {
-      const fileContent = await fs.readFile(settingsPath, 'utf-8');
-      existingSettings = JSON.parse(fileContent);
-      settingsExists = true;
-      if (existingSettings.nombre_doctor && existingSettings.nombre_doctor.trim()) {
-        nombreDoctor = existingSettings.nombre_doctor.trim();
+      const settingsRes = await fetchWithTimeout(`${BACKEND}/settings?clinica_id=${clinicaId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 2000,
+        cache: 'no-store'
+      });
+      if (settingsRes.ok) {
+        const body = await settingsRes.json();
+        if (body?.status === 'success' && body?.settings) {
+          settingsData = body.settings;
+          if (settingsData.nombre_doctor && settingsData.nombre_doctor.trim()) {
+            nombreDoctor = settingsData.nombre_doctor.trim();
+          }
+          if (settingsData.nombre_clinica && settingsData.nombre_clinica.trim()) {
+            nombreClinica = settingsData.nombre_clinica.trim();
+          }
+          console.log(`[Settings API Load] Loaded settings from backend: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
+        }
       }
-      if (existingSettings.nombre_clinica && existingSettings.nombre_clinica.trim()) {
-        nombreClinica = existingSettings.nombre_clinica.trim();
-      }
-      console.log(`[Settings Dynamic Load] Loaded settings_${clinicaId}.json: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
     } catch (e: any) {
-      console.warn(`[Settings Dynamic Load] Failed to load settings_${clinicaId}.json. Attempting default settings.json. Error: ${e.message}`);
-      try {
-        const defaultSettingsPath = path.join(process.cwd(), '..', 'backend', 'static', 'settings.json');
-        const defaultFileContent = await fs.readFile(defaultSettingsPath, 'utf-8');
-        const defaultSettings = JSON.parse(defaultFileContent);
-        if (defaultSettings.nombre_doctor) {
-          nombreDoctor = defaultSettings.nombre_doctor.trim();
-        }
-        if (defaultSettings.nombre_clinica) {
-          nombreClinica = defaultSettings.nombre_clinica.trim();
-        }
-      } catch (e2) {
-        console.warn(`[Settings Dynamic Load] Failed to load default settings.json. Using hardcoded defaults.`);
-      }
+      console.warn(`[Settings API Load] Failed to fetch settings from backend: ${e.message}`);
     }
 
-    // Si no existe el archivo, o existe pero no tiene nombre de doctor/clínica configurados, lo guardamos/actualizamos
-    if (!settingsExists || !existingSettings.nombre_doctor || !existingSettings.nombre_clinica) {
+    // Si no obtuvimos configuraciones válidas o faltan datos esenciales del doctor/clínica,
+    // y tenemos datos del usuario desde Clerk, inicializamos la configuración llamando al API POST /settings
+    if (user && (!settingsData || !settingsData.nombre_doctor || !settingsData.nombre_clinica || settingsData.nombre_doctor.startsWith('Dentista Responsable') || settingsData.nombre_clinica.startsWith('Clínica Dental'))) {
       try {
         const newSettings = {
           clinica_id: clinicaId,
-          twilio_whatsapp_number: existingSettings.twilio_whatsapp_number || "whatsapp:+14155238886",
-          twilio_sms_number: existingSettings.twilio_sms_number || "+14155238886",
           nombre_clinica: nombreClinica,
           nombre_doctor: nombreDoctor,
-          especialidad: existingSettings.especialidad || "Odontología General",
-          region_scraper: existingSettings.region_scraper || "MX",
-          canal_notificacion: existingSettings.canal_notificacion || "email",
-          telefono_contacto: existingSettings.telefono_contacto || "+529511234567"
+          especialidad: settingsData?.especialidad || "Odontología General",
+          region_scraper: settingsData?.region_scraper || "MX",
+          canal_notificacion: settingsData?.canal_notificacion || "email",
+          telefono_contacto: settingsData?.telefono_contacto || "+529511234567",
+          twilio_whatsapp_number: settingsData?.twilio_whatsapp_number || "whatsapp:+14155238886",
+          twilio_sms_number: settingsData?.twilio_sms_number || "+14155238886"
         };
-        await fs.mkdir(path.dirname(settingsPath), { recursive: true });
-        await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2), 'utf-8');
-        console.log(`[Settings Dynamic Load] Personalizado e inicializado settings_${clinicaId}.json: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
+        // Enviamos al backend de forma asíncrona
+        fetchWithTimeout(`${BACKEND}/settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+          timeout: 2000
+        }).then(async (res) => {
+          if (res.ok) {
+            console.log(`[Settings API Init] Personalizado e inicializado settings en backend: Doctor=${nombreDoctor}, Clinica=${nombreClinica}`);
+          }
+        }).catch(err => console.error(`[Settings API Init] Error al inicializar settings en backend: ${err.message}`));
       } catch (err: any) {
-        console.error(`[Settings Dynamic Load] Error al escribir settings_${clinicaId}.json:`, err.message);
+        console.error(`[Settings API Init] Error en inicialización de settings:`, err.message);
       }
     }
 
@@ -1286,18 +1291,16 @@ export async function POST(req: Request) {
     let activeModel = 'gemini-3.5-flash';
 
     while (continueLoop && currentStep < maxSteps) {
-      // Server-side timeout guard to prevent raw Vercel crash and respond with a friendly message
-      if (Date.now() - startTime > TIMEOUT_LIMIT) {
-        console.error(`[PERF LOG] Timeout Guard triggered. Total execution time: ${Date.now() - startTime}ms. Aborting ReAct loop.`);
-        return new Response(
-          lang === 'en'
-            ? 'Clinical System Timeout: The request took too long to process. The clinical AI model or database queries took longer than usual. Please retry your request.'
-            : 'Error de Tiempo de Espera: La solicitud tardó demasiado en procesarse. El modelo de IA clínica o las consultas de base de datos demoraron más de lo habitual. Por favor, reintente su consulta.',
-          { status: 504 }
-        );
+      const remainingTime = TIMEOUT_LIMIT - (Date.now() - startTime);
+      if (remainingTime < 3000) {
+        console.warn(`[PERF LOG] Low time budget remaining (${remainingTime}ms). Stopping ReAct loop to return partial results.`);
+        break;
       }
 
-      console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep} using model: ${activeModel}`);
+      console.log(`[DEBUG] ReAct Custom Loop - Step ${currentStep} using model: ${activeModel}. Remaining time: ${remainingTime}ms`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), Math.max(500, remainingTime - 1500));
       
       const modelStart = Date.now();
       let stepResult;
@@ -1307,11 +1310,18 @@ export async function POST(req: Request) {
           maxRetries: 2, // Habilitamos 2 reintentos automáticos nativos ante micro-picos del servidor de Google
           system: systemPrompt,
           messages: currentMessages,
-          tools: toolsDefinition
+          tools: toolsDefinition,
+          abortSignal: controller.signal
         });
         const modelDuration = Date.now() - modelStart;
         console.log(`[PERF LOG] Step ${currentStep} Model generation (${activeModel}) took ${modelDuration}ms`);
       } catch (err: any) {
+        const isAbort = err.name === 'AbortError' || (err.message && err.message.toLowerCase().includes('abort'));
+        if (isAbort) {
+          console.warn(`[PERF LOG] Step ${currentStep} generation aborted due to timeout.`);
+          break; // Break the loop to return partial results gracefully
+        }
+
         const shouldFallback =
           err?.message?.includes('quota') ||
           err?.message?.includes('Quota') ||
@@ -1333,32 +1343,64 @@ export async function POST(req: Request) {
               maxRetries: 2,
               system: systemPrompt,
               messages: currentMessages,
-              tools: toolsDefinition
+              tools: toolsDefinition,
+              abortSignal: controller.signal
             });
           } catch (err2: any) {
+            const isAbort2 = err2.name === 'AbortError' || (err2.message && err2.message.toLowerCase().includes('abort'));
+            if (isAbort2) {
+              console.warn(`[PERF LOG] Step ${currentStep} generation fallback aborted due to timeout.`);
+              break;
+            }
             console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
             activeModel = 'gemini-3-flash-preview';
+            try {
+              stepResult = await generateText({
+                model: google(activeModel),
+                maxRetries: 2,
+                system: systemPrompt,
+                messages: currentMessages,
+                tools: toolsDefinition,
+                abortSignal: controller.signal
+              });
+            } catch (err3: any) {
+              const isAbort3 = err3.name === 'AbortError' || (err3.message && err3.message.toLowerCase().includes('abort'));
+              if (isAbort3) {
+                console.warn(`[PERF LOG] Step ${currentStep} generation fallback 2 aborted due to timeout.`);
+                break;
+              }
+              throw err3;
+            }
+          }
+        } else if (shouldFallback && activeModel === 'gemini-3.1-pro-preview') {
+          console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
+          activeModel = 'gemini-3-flash-preview';
+          try {
             stepResult = await generateText({
               model: google(activeModel),
               maxRetries: 2,
               system: systemPrompt,
               messages: currentMessages,
-              tools: toolsDefinition
+              tools: toolsDefinition,
+              abortSignal: controller.signal
             });
+          } catch (err2: any) {
+            const isAbort2 = err2.name === 'AbortError' || (err2.message && err2.message.toLowerCase().includes('abort'));
+            if (isAbort2) {
+              console.warn(`[PERF LOG] Step ${currentStep} generation fallback aborted due to timeout.`);
+              break;
+            }
+            throw err2;
           }
-        } else if (shouldFallback && activeModel === 'gemini-3.1-pro-preview') {
-          console.warn(`[WARN] Model gemini-3.1-pro-preview failed. Falling back to gemini-3-flash-preview.`);
-          activeModel = 'gemini-3-flash-preview';
-          stepResult = await generateText({
-            model: google(activeModel),
-            maxRetries: 2,
-            system: systemPrompt,
-            messages: currentMessages,
-            tools: toolsDefinition
-          });
         } else {
           throw err;
         }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (!stepResult) {
+        break; // exit if aborted
       }
 
       if (stepResult.steps && stepResult.steps.length > 0) {
@@ -1565,6 +1607,15 @@ export async function POST(req: Request) {
       .replace(/^AGENTE\s+IA\s*/i, '')
       .trim();
 
+    // If the loop was interrupted due to timeout, prepend a friendly warning and list partial results
+    if (continueLoop) {
+      const warningText = lang === 'en'
+        ? `⚠️ **Clinical System Timeout (Partial Results)**: The request was taking longer than expected. I have returned the partial results generated up to this point.`
+        : `⚠️ **Límite de Tiempo Alcanzado (Resultados Parciales)**: La solicitud tomó más tiempo del habitual. He recuperado los resultados parciales generados hasta el momento.`;
+      
+      finalResponseText = `${warningText}\n\n${finalResponseText}`;
+    }
+
     // INTERCEPTOR FORCE VISUALIZATION:
     // Si buscar_precio_material se ejecutó, inyectamos la tabla Markdown directamente, garantizando la visualización de proveedores.
     if (scraperTable) {
@@ -1689,8 +1740,8 @@ export async function POST(req: Request) {
       }
     }
 
-    return new Response(JSON.stringify({ text: clinicalMessage, error: true }), {
-      status: 500,
+    return new Response(JSON.stringify({ text: `[ERROR CLÍNICO]: ${clinicalMessage}`, error: true }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   }

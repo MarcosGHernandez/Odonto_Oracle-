@@ -206,7 +206,7 @@ function Field({
   rows?: number;
 }) {
   const baseClass =
-    'w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal';
+    'w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal';
 
   return (
     <div className="space-y-1">
@@ -403,7 +403,7 @@ function GenerarRecetaModal({ paciente, clinicaId, lang, onClose, onSuccess }: G
               onChange={e => setDiagnostico(e.target.value)}
               disabled={loading}
               placeholder={lang === 'es' ? 'Ej: Caries profunda en molar 36 con compromiso pulpar...' : 'E.g: Deep caries on molar 36 with pulp compromise...'}
-              className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal resize-y"
+              className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal resize-y"
             />
           </div>
 
@@ -424,7 +424,7 @@ function GenerarRecetaModal({ paciente, clinicaId, lang, onClose, onSuccess }: G
                     ? (lang === 'es' ? 'Ej: Extracción dental $800, Resina anterior $1,200...' : 'E.g: Tooth extraction $800, Anterior resin $1,200...')
                     : (lang === 'es' ? 'Ej: Sesión 1 — Endodoncia molar 36. Sesión 2 — Corona...' : 'E.g: Session 1 — Endodontics molar 36. Session 2 — Crown...')
               }
-              className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal resize-y"
+              className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700 placeholder:font-normal resize-y"
             />
           </div>
 

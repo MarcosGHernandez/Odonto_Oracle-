@@ -117,7 +117,7 @@ export default function PacientesPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={labels.searchPlaceholder}
-            className="w-full bg-white dark:bg-black border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white pl-12 pr-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-zinc-700"
+            className="w-full bg-white dark:bg-black border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white pl-12 pr-4 py-3 text-base lg:text-[10px] font-black uppercase tracking-widest outline-none transition-all placeholder:text-slate-300 dark:placeholder:text-zinc-700"
           />
         </div>
         <div className="flex items-center gap-4">

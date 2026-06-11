@@ -391,7 +391,7 @@ export default function ChatInterface() {
           rows={2}
           maxLength={MAX_INPUT_LENGTH}
           disabled={isLoading}
-          className="flex-1 bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-xs font-bold outline-none transition-all resize-none disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700"
+          className="flex-1 bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-xs font-bold outline-none transition-all resize-none disabled:opacity-40 placeholder:text-slate-300 dark:placeholder:text-zinc-700"
         />
         <button
           onClick={() => handleSubmit()}

@@ -1034,7 +1034,7 @@ export default function CalendarioPage() {
                     onChange={(e) => {
                       setFormPatientId(e.target.value);
                     }}
-                    className="w-full bg-white dark:bg-black border border-slate-300 dark:border-zinc-800 p-2 text-[10px] font-bold uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                    className="w-full bg-white dark:bg-black border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] font-bold uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                     required
                   >
                     <option value="">-- {lang === 'es' ? 'SELECCIONA PACIENTE' : 'SELECT PATIENT'} --</option>
@@ -1059,7 +1059,7 @@ export default function CalendarioPage() {
                     value={formManualPatientId}
                     onChange={(e) => setFormManualPatientId(e.target.value.toUpperCase())}
                     placeholder="P-XXXXXX"
-                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                     required={formPatientId === 'MANUAL' || formPatientId === ''}
                   />
                 </div>
@@ -1075,7 +1075,7 @@ export default function CalendarioPage() {
                     type="date"
                     value={formFecha}
                     onChange={(e) => setFormFecha(e.target.value)}
-                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                     required
                   />
                 </div>
@@ -1087,7 +1087,7 @@ export default function CalendarioPage() {
                     type="time"
                     value={formHora}
                     onChange={(e) => setFormHora(e.target.value)}
-                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                    className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] font-mono tracking-widest uppercase focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                     required
                   />
                 </div>
@@ -1103,7 +1103,7 @@ export default function CalendarioPage() {
                   onChange={(e) => setFormDiagnostico(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Dolor agudo en molar inferior' : 'e.g., Acute molar pain'}
                   rows={2}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                   required
                 />
               </div>
@@ -1118,7 +1118,7 @@ export default function CalendarioPage() {
                   value={formTratamiento}
                   onChange={(e) => setFormTratamiento(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Endodoncia molar 36' : 'e.g., Root canal'}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -1132,7 +1132,7 @@ export default function CalendarioPage() {
                   onChange={(e) => setFormNotas(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Paciente hipertenso controlado' : 'e.g., Hypertensive'}
                   rows={2}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -1277,7 +1277,7 @@ export default function CalendarioPage() {
                   onChange={(e) => setCompleteDiagnostico(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Pulpitis irreversible en órgano dental 36' : 'e.g., Irreversible pulpitis'}
                   rows={2}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                   required
                 />
               </div>
@@ -1292,7 +1292,7 @@ export default function CalendarioPage() {
                   value={completeTratamiento}
                   onChange={(e) => setCompleteTratamiento(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Pulpectomía y obturación provisional' : 'e.g., Pulpectomy and obturation'}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                   required
                 />
               </div>
@@ -1307,7 +1307,7 @@ export default function CalendarioPage() {
                   onChange={(e) => setCompleteNotas(e.target.value)}
                   placeholder={lang === 'es' ? 'Ej: Se receta analgésico por 3 días. Próxima cita en 1 semana.' : 'e.g., Analgesics prescribed'}
                   rows={2}
-                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
+                  className="w-full bg-transparent border border-slate-300 dark:border-zinc-800 p-2 text-base lg:text-[10px] uppercase tracking-wider focus:outline-none focus:border-slate-950 dark:focus:border-white text-slate-900 dark:text-white"
                 />
               </div>
 

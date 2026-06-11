@@ -181,7 +181,7 @@ export default function AjustesPage() {
                   type="text"
                   value={profile.nombre}
                   onChange={e => setProfile({ ...profile, nombre: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -193,7 +193,7 @@ export default function AjustesPage() {
                   value={profile.nombreDoctor}
                   onChange={e => setProfile({ ...profile, nombreDoctor: e.target.value })}
                   placeholder={lang === 'es' ? 'Ej. Dr. Juan Pérez' : 'e.g. Dr. John Smith'}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
@@ -204,7 +204,7 @@ export default function AjustesPage() {
                   type="text"
                   value={profile.especialidad}
                   onChange={e => setProfile({ ...profile, especialidad: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
                 />
               </div>
               <button
@@ -268,7 +268,7 @@ export default function AjustesPage() {
                   value={prefs.telefono_contacto}
                   onChange={e => setPrefs({ ...prefs, telefono_contacto: e.target.value })}
                   placeholder="e.g. +529511234567"
-                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-zinc-950 border-2 border-slate-200 dark:border-zinc-800 focus:border-slate-900 dark:focus:border-white px-4 py-3 text-base lg:text-sm font-bold outline-none transition-all text-slate-900 dark:text-white"
                 />
               </div>
               <button
